@@ -21,7 +21,7 @@ class Admin {
 	 *
 	 * @return void
 	 */
-	public static function init(): void {
+	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'register_admin_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'render_admin_notices' ) );
@@ -34,7 +34,7 @@ class Admin {
 	 *
 	 * @return void
 	 */
-	public static function register_admin_menu(): void {
+	public static function register_admin_menu() {
 		add_users_page(
 			__( 'Role Expiration Manager', 'user-role-expiration-manager' ),
 			__( 'Role Expiration', 'user-role-expiration-manager' ),
@@ -50,7 +50,7 @@ class Admin {
 	 * @param string $hook_suffix Current admin page hook.
 	 * @return void
 	 */
-	public static function enqueue_admin_assets( string $hook_suffix ): void {
+	public static function enqueue_admin_assets( $hook_suffix ) {
 		// Load on Users list, User edit, Profile, and Plugin admin page
 		$allowed_pages = array( 'users.php', 'user-edit.php', 'profile.php', 'users_page_user-role-expiration-manager' );
 		if ( ! in_array( $hook_suffix, $allowed_pages, true ) ) {
@@ -88,14 +88,18 @@ class Admin {
 	 *
 	 * @return void
 	 */
-	public static function render_admin_notices(): void {
+	public static function render_admin_notices() {
 		if ( ! current_user_can( 'edit_users' ) ) {
+			return;
+		}
+
+		if ( ! function_exists( 'get_current_screen' ) ) {
 			return;
 		}
 
 		// Only show on relevant admin screens to avoid spamming
 		$screen = get_current_screen();
-		if ( ! $screen || ! in_array( $screen->id, array( 'dashboard', 'users', 'users_page_user-role-expiration-manager' ), true ) ) {
+		if ( ! $screen || ! isset( $screen->id ) || ! in_array( $screen->id, array( 'dashboard', 'users', 'users_page_user-role-expiration-manager' ), true ) ) {
 			return;
 		}
 
@@ -117,15 +121,17 @@ class Admin {
 
 		$user_ids = $enabled_users->get_results();
 
-		foreach ( $user_ids as $uid ) {
-			$uid  = (int) $uid;
-			$days = Expiration::get_remaining_days( $uid );
+		if ( ! empty( $user_ids ) ) {
+			foreach ( $user_ids as $uid ) {
+				$uid  = (int) $uid;
+				$days = Expiration::get_remaining_days( $uid );
 
-			if ( null !== $days ) {
-				if ( $days >= 0 && $days <= 7 ) {
-					$expiring_7_days_count++;
-				} elseif ( -1 === $days || 0 === $days ) {
-					$expired_today_count++;
+				if ( null !== $days ) {
+					if ( $days >= 0 && $days <= 7 ) {
+						$expiring_7_days_count++;
+					} elseif ( -1 === $days || 0 === $days ) {
+						$expired_today_count++;
+					}
 				}
 			}
 		}
@@ -173,7 +179,7 @@ class Admin {
 	 *
 	 * @return void
 	 */
-	public static function handle_clear_logs(): void {
+	public static function handle_clear_logs() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Unauthorized user.', 'user-role-expiration-manager' ) );
 		}
@@ -200,7 +206,7 @@ class Admin {
 	 *
 	 * @return void
 	 */
-	public static function render_admin_page(): void {
+	public static function render_admin_page() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
