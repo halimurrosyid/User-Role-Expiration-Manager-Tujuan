@@ -1,0 +1,16 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Gemini & Agent Artifacts
+.gemini/
+
+# Temporary / Log files
+*.log
+scratch/

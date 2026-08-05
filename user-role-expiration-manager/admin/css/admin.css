@@ -1,0 +1,63 @@
+/**
+ * Admin Styles for User Role Expiration Manager.
+ */
+
+.urem-badge {
+	display: inline-block;
+	padding: 3px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	border-radius: 4px;
+	line-height: 1.4;
+	text-align: center;
+}
+
+/* Green Badge: Aktif */
+.urem-badge-green {
+	background-color: #d1e7dd;
+	color: #0f5132;
+	border: 1px solid #badbcc;
+}
+
+/* Yellow Badge: Akan Expired (<30 hari) */
+.urem-badge-yellow {
+	background-color: #fff3cd;
+	color: #664d03;
+	border: 1px solid #ffecb5;
+}
+
+/* Red Badge: Expired */
+.urem-badge-red {
+	background-color: #f8d7da;
+	color: #842029;
+	border: 1px solid #f5c2c7;
+}
+
+/* Gray Badge: Disabled */
+.urem-badge-gray {
+	background-color: #e2e3e5;
+	color: #41464b;
+	border: 1px solid #d3d6d8;
+}
+
+.urem-trigger-tag {
+	display: inline-block;
+	padding: 2px 6px;
+	font-size: 11px;
+	background: #f0f0f1;
+	border: 1px solid #c3c4c7;
+	border-radius: 3px;
+	font-family: monospace;
+}
+
+.urem-admin-wrap .card {
+	background: #ffffff;
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.urem-logs-container table code {
+	background: #f6f7f7;
+	padding: 2px 5px;
+	border-radius: 3px;
+}

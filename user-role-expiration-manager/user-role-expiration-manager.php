@@ -1,0 +1,47 @@
+<?php
+/**
+ * Plugin Name: User Role Expiration Manager
+ * Plugin URI: https://wordpress.org/plugins/user-role-expiration-manager/
+ * Description: Mengelola masa berlaku role pengguna WordPress secara otomatis dan aman dengan integrasi menu native Pengguna, per-user profile panel, WP-Cron batching, dan logger.
+ * Version: 1.0.0
+ * Author: Antigravity Team
+ * Author URI: https://wordpress.org/
+ * Text Domain: user-role-expiration-manager
+ * Domain Path: /languages
+ * Requires at least: 6.8
+ * Requires PHP: 8.1
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
+ * @package UserRoleExpirationManager
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
+// Define Constants
+define( 'UREM_VERSION', '1.0.0' );
+define( 'UREM_PLUGIN_FILE', __FILE__ );
+define( 'UREM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'UREM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+
+// Load Autoloader
+require_once UREM_PLUGIN_DIR . 'includes/class-autoloader.php';
+\UserRoleExpirationManager\Autoloader::register();
+
+/**
+ * Register Activation & Deactivation Hooks.
+ */
+register_activation_hook( __FILE__, array( '\UserRoleExpirationManager\Plugin', 'activate' ) );
+register_deactivation_hook( __FILE__, array( '\UserRoleExpirationManager\Plugin', 'deactivate' ) );
+
+/**
+ * Bootstrap Main Plugin Instance.
+ */
+function urem_init_plugin(): \UserRoleExpirationManager\Plugin {
+	return \UserRoleExpirationManager\Plugin::get_instance();
+}
+
+// Fire plugin bootstrap
+urem_init_plugin();
