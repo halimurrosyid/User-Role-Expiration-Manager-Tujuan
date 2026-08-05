@@ -2,7 +2,7 @@
 
 Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara otomatis, aman, dan efisien.
 
-[![GitHub Release](https://img.shields.io/github/v/release/halimurrosyid/User-Role-Expiration-Manager?style=flat-square)](https://github.com/halimurrosyid/User-Role-Expiration-Manager/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/halimurrosyid/User-Role-Expiration-Manager-Tujuan?style=flat-square)](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan/releases)
 [![WordPress Compatible](https://img.shields.io/badge/WordPress-6.8%2B-blue?style=flat-square)](https://wordpress.org)
 [![PHP Compatible](https://img.shields.io/badge/PHP-8.1%2B-777bb4?style=flat-square)](https://php.net)
 
@@ -14,14 +14,14 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 - **Versi**: 1.0.0
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
-- **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager](https://github.com/halimurrosyid/User-Role-Expiration-Manager)
+- **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
 - **Lisensi**: GPL v2 or later
 
 ---
 
 ## 🌟 Fitur Utama
 
-- **Automatic Update dari Dashboard WordPress**: Terhubung langsung dengan repository GitHub (`halimurrosyid/User-Role-Expiration-Manager`). Setiap kali ada versi rilis baru di GitHub, WordPress akan mendeteksi dan memperbarui plugin secara otomatis dari Dashboard tanpa perlu instalasi ulang atau plugin tambahan.
+- **Automatic Update dari Dashboard WordPress**: Terhubung langsung dengan repository GitHub (`halimurrosyid/User-Role-Expiration-Manager-Tujuan`). Setiap kali ada versi rilis baru di GitHub, WordPress akan mendeteksi dan memperbarui plugin secara otomatis dari Dashboard tanpa perlu instalasi ulang atau plugin tambahan.
 - **Tidak Mengubah Data Login Auth**: Menggunakan metadata sendiri (`_urem_*`) sehingga 100% aman dan kompatibel dengan plugin autentikasi seperti **Authorizer**, **WooCommerce**, **User Role Editor**, dan **Members**.
 - **Integrasi Native WP Admin**:
   - Submenu "Role Expiration" di bawah menu **Pengguna (Users)**.
@@ -48,7 +48,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🚀 Cara Instalasi & Automatic Updates
 
-1. Unduh file `.zip` dari [GitHub Releases](https://github.com/halimurrosyid/User-Role-Expiration-Manager/releases/latest) atau salin folder `user-role-expiration-manager` ke direktori plugin WordPress Anda:
+1. Unduh file `.zip` dari [GitHub Releases](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan/releases/latest) atau salin folder `user-role-expiration-manager` ke direktori plugin WordPress Anda:
    ```
    wp-content/plugins/user-role-expiration-manager/
    ```

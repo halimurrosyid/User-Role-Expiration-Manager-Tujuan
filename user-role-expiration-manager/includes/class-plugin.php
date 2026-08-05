@@ -54,7 +54,7 @@ final class Plugin {
 			define( 'UREM_VERSION', '1.0.0' );
 		}
 		if ( ! defined( 'UREM_GITHUB_REPO' ) ) {
-			define( 'UREM_GITHUB_REPO', 'halimurrosyid/User-Role-Expiration-Manager' );
+			define( 'UREM_GITHUB_REPO', 'halimurrosyid/User-Role-Expiration-Manager-Tujuan' );
 		}
 	}
 
