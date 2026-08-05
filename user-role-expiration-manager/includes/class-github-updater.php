@@ -181,7 +181,7 @@ class GitHub_Updater {
 		$res->name          = 'User Role Expiration Manager';
 		$res->slug          = $slug;
 		$res->version       = $new_version;
-		$res->author        = '<a href="https://github.com/halimurrosyid">Halimurrosyid</a>';
+		$res->author        = '<a href="https://it.telkomuniversity.ac.id/" target="_blank">Mujaddid Halimurrosyid</a>';
 		$res->homepage      = 'https://github.com/' . $this->repository;
 		$res->requires      = '6.8';
 		$res->tested        = get_bloginfo( 'version' );

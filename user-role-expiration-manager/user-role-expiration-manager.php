@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: User Role Expiration Manager
- * Plugin URI: https://wordpress.org/plugins/user-role-expiration-manager/
+ * Plugin URI: https://github.com/halimurrosyid/User-Role-Expiration-Manager
  * Description: Mengelola masa berlaku role pengguna WordPress secara otomatis dan aman dengan integrasi menu native Pengguna, per-user profile panel, WP-Cron batching, dan logger.
  * Version: 1.0.0
- * Author: Antigravity Team
- * Author URI: https://wordpress.org/
+ * Author: Mujaddid Halimurrosyid
+ * Author URI: https://it.telkomuniversity.ac.id/
  * Text Domain: user-role-expiration-manager
  * Domain Path: /languages
  * Requires at least: 6.8

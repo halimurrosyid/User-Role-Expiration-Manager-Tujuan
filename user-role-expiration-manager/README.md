@@ -8,6 +8,17 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ---
 
+## 📌 Informasi Plugin
+
+- **Nama Plugin**: User Role Expiration Manager
+- **Versi**: 1.0.0
+- **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
+- **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
+- **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager](https://github.com/halimurrosyid/User-Role-Expiration-Manager)
+- **Lisensi**: GPL v2 or later
+
+---
+
 ## 🌟 Fitur Utama
 
 - **Automatic Update dari Dashboard WordPress**: Terhubung langsung dengan repository GitHub (`halimurrosyid/User-Role-Expiration-Manager`). Setiap kali ada versi rilis baru di GitHub, WordPress akan mendeteksi dan memperbarui plugin secara otomatis dari Dashboard tanpa perlu instalasi ulang atau plugin tambahan.
@@ -107,7 +118,7 @@ Setiap kali Anda membuat pembaruan atau perbaikan fitur pada plugin ini, ikuti a
 ## 📝 Changelog
 
 ### Version 1.0.0 (2026-08-05)
-- **Initial Release**: Rilis perdana plugin User Role Expiration Manager.
+- **Initial Release**: Rilis perdana plugin User Role Expiration Manager oleh Mujaddid Halimurrosyid ([Telkom University IT](https://it.telkomuniversity.ac.id/)).
 - Integration dengan menu native WordPress **Pengguna (Users)**.
 - Per-user role expiration management di halaman `user-edit.php`.
 - Dashboard Widget ringkasan status pengguna.
