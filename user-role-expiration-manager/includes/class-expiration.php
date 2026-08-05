@@ -19,11 +19,12 @@ class Expiration {
 	/**
 	 * Meta key constants.
 	 */
-	public const META_ENABLED  = '_urem_expiration_enabled';
-	public const META_START    = '_urem_expiration_start';
-	public const META_DURATION = '_urem_expiration_duration';
-	public const META_UNIT     = '_urem_expiration_unit';
-	public const META_ROLE     = '_urem_expiration_role';
+	public const META_ENABLED   = '_urem_expiration_enabled';
+	public const META_START     = '_urem_expiration_start';
+	public const META_DURATION  = '_urem_expiration_duration';
+	public const META_UNIT      = '_urem_expiration_unit';
+	public const META_ROLE      = '_urem_expiration_role';
+	public const META_TIMESTAMP = '_urem_expiration_ts';
 
 	/**
 	 * Get user expiration metadata with fallback to global settings.
@@ -95,6 +96,22 @@ class Expiration {
 	}
 
 	/**
+	 * Save/Update indexed timestamp user meta for fast SQL queries.
+	 *
+	 * @param int $user_id User ID.
+	 * @return int|null Calculated timestamp.
+	 */
+	public static function update_expiration_timestamp_meta( int $user_id ): ?int {
+		$ts = self::get_expiration_timestamp( $user_id );
+		if ( null !== $ts ) {
+			update_user_meta( $user_id, self::META_TIMESTAMP, $ts );
+		} else {
+			delete_user_meta( $user_id, self::META_TIMESTAMP );
+		}
+		return $ts;
+	}
+
+	/**
 	 * Get remaining days until expiration.
 	 *
 	 * @param int $user_id User ID.
@@ -106,8 +123,8 @@ class Expiration {
 			return null;
 		}
 
-		$now       = current_time( 'timestamp' );
-		$diff_sec  = $exp_ts - $now;
+		$now      = current_time( 'timestamp' );
+		$diff_sec = $exp_ts - $now;
 
 		return (int) floor( $diff_sec / DAY_IN_SECONDS );
 	}
@@ -135,7 +152,7 @@ class Expiration {
 			return 'expired';
 		}
 
-		$days = self::get_remaining_days( $user_id );
+		$days      = self::get_remaining_days( $user_id );
 		$threshold = (int) apply_filters( 'urem_expiring_soon_threshold_days', 30 );
 
 		if ( null !== $days && $days <= $threshold ) {
@@ -171,8 +188,8 @@ class Expiration {
 		$data = self::get_user_expiration_data( $user_id );
 
 		// Retrieve primary old role
-		$old_roles = (array) $user->roles;
-		$old_role  = ! empty( $old_roles ) ? reset( $old_roles ) : 'none';
+		$old_roles  = (array) $user->roles;
+		$old_role   = ! empty( $old_roles ) ? reset( $old_roles ) : 'none';
 		$target_role = $data['role'];
 
 		// Do not process if target role is identical to current role
@@ -199,9 +216,6 @@ class Expiration {
 			} else {
 				$user->set_role( $target_role );
 			}
-
-			// Optionally disable further expiration once processed or keep enabled
-			// We keep meta enabled so history is transparent, but user is no longer processed repeatedly because current role == target role.
 
 			// Logout user session if enabled
 			if ( ! empty( $settings['logout_user_on_expire'] ) ) {

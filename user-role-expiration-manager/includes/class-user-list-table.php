@@ -24,6 +24,7 @@ class User_List_Table {
 	public static function init(): void {
 		add_filter( 'manage_users_columns', array( __CLASS__, 'add_custom_columns' ) );
 		add_filter( 'manage_users_custom_column', array( __CLASS__, 'render_custom_column_content' ), 10, 3 );
+		add_filter( 'manage_users_sortable_columns', array( __CLASS__, 'make_columns_sortable' ) );
 
 		add_action( 'restrict_manage_users', array( __CLASS__, 'render_expiration_filter_dropdown' ) );
 		add_action( 'pre_get_users', array( __CLASS__, 'filter_users_by_expiration_status' ) );
@@ -36,12 +37,23 @@ class User_List_Table {
 	 * @return array Modified columns.
 	 */
 	public static function add_custom_columns( array $columns ): array {
-		$columns['urem_start']      = __( 'Tanggal Mulai', 'user-role-expiration-manager' );
-		$columns['urem_expired']    = __( 'Tanggal Expired', 'user-role-expiration-manager' );
+		$columns['urem_start']       = __( 'Tanggal Mulai', 'user-role-expiration-manager' );
+		$columns['urem_expired']     = __( 'Tanggal Expired', 'user-role-expiration-manager' );
 		$columns['urem_target_role'] = __( 'Role Setelah Expired', 'user-role-expiration-manager' );
-		$columns['urem_status']     = __( 'Status', 'user-role-expiration-manager' );
-		$columns['urem_remaining']  = __( 'Sisa Hari', 'user-role-expiration-manager' );
+		$columns['urem_status']      = __( 'Status', 'user-role-expiration-manager' );
+		$columns['urem_remaining']   = __( 'Sisa Hari', 'user-role-expiration-manager' );
 
+		return $columns;
+	}
+
+	/**
+	 * Make custom columns sortable.
+	 *
+	 * @param array $columns Existing sortable columns.
+	 * @return array Modified sortable columns.
+	 */
+	public static function make_columns_sortable( array $columns ): array {
+		$columns['urem_expired'] = 'urem_expired_ts';
 		return $columns;
 	}
 
@@ -124,7 +136,7 @@ class User_List_Table {
 	}
 
 	/**
-	 * Filter user query based on selected status filter.
+	 * Filter user query based on selected status filter and column sorting.
 	 *
 	 * @param \WP_User_Query $query Query object.
 	 * @return void
@@ -134,7 +146,15 @@ class User_List_Table {
 			return;
 		}
 
-		$status = isset( $_GET['urem_status'] ) ? sanitize_text_field( wp_unslash( $_GET['urem_status'] ) ) : '';
+		$status  = isset( $_GET['urem_status'] ) ? sanitize_text_field( wp_unslash( $_GET['urem_status'] ) ) : '';
+		$orderby = $query->get( 'orderby' );
+
+		// Handle column sorting by expiration timestamp
+		if ( 'urem_expired_ts' === $orderby ) {
+			$query->set( 'meta_key', Expiration::META_TIMESTAMP );
+			$query->set( 'orderby', 'meta_value_num' );
+		}
+
 		if ( empty( $status ) ) {
 			return;
 		}
@@ -144,26 +164,73 @@ class User_List_Table {
 			$meta_query = array();
 		}
 
-		if ( 'disabled' === $status ) {
-			$meta_query[] = array(
-				'relation' => 'OR',
-				array(
+		$now       = current_time( 'timestamp' );
+		$threshold = (int) apply_filters( 'urem_expiring_soon_threshold_days', 30 );
+		$soon_ts   = $now + ( $threshold * DAY_IN_SECONDS );
+
+		switch ( $status ) {
+			case 'disabled':
+				$meta_query[] = array(
+					'relation' => 'OR',
+					array(
+						'key'     => Expiration::META_ENABLED,
+						'value'   => '0',
+						'compare' => '=',
+					),
+					array(
+						'key'     => Expiration::META_ENABLED,
+						'compare' => 'NOT EXISTS',
+					),
+				);
+				break;
+
+			case 'expired':
+				$meta_query[] = array(
 					'key'     => Expiration::META_ENABLED,
-					'value'   => '0',
+					'value'   => '1',
 					'compare' => '=',
-				),
-				array(
+				);
+				$meta_query[] = array(
+					'key'     => Expiration::META_TIMESTAMP,
+					'value'   => $now,
+					'compare' => '<=',
+					'type'    => 'NUMERIC',
+				);
+				break;
+
+			case 'expiring_soon':
+				$meta_query[] = array(
 					'key'     => Expiration::META_ENABLED,
-					'compare' => 'NOT EXISTS',
-				),
-			);
-		} else {
-			// Require enabled = 1
-			$meta_query[] = array(
-				'key'     => Expiration::META_ENABLED,
-				'value'   => '1',
-				'compare' => '=',
-			);
+					'value'   => '1',
+					'compare' => '=',
+				);
+				$meta_query[] = array(
+					'key'     => Expiration::META_TIMESTAMP,
+					'value'   => $now,
+					'compare' => '>',
+					'type'    => 'NUMERIC',
+				);
+				$meta_query[] = array(
+					'key'     => Expiration::META_TIMESTAMP,
+					'value'   => $soon_ts,
+					'compare' => '<=',
+					'type'    => 'NUMERIC',
+				);
+				break;
+
+			case 'active':
+				$meta_query[] = array(
+					'key'     => Expiration::META_ENABLED,
+					'value'   => '1',
+					'compare' => '=',
+				);
+				$meta_query[] = array(
+					'key'     => Expiration::META_TIMESTAMP,
+					'value'   => $soon_ts,
+					'compare' => '>',
+					'type'    => 'NUMERIC',
+				);
+				break;
 		}
 
 		$query->set( 'meta_query', $meta_query );

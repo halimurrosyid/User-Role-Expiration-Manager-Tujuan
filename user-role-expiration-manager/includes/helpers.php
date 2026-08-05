@@ -11,25 +11,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! function_exists( 'urem_get_all_roles' ) ) {
 	/**
-	 * Retrieve all registered roles in WordPress.
+	 * Retrieve all registered and editable roles in WordPress.
 	 *
-	 * Includes an option for 'No Role' (empty string/none).
+	 * Fully compatible with WooCommerce, User Role Editor, Members, and Authorizer.
 	 *
 	 * @return array Array of role_key => Role Name.
 	 */
 	function urem_get_all_roles(): array {
-		global $wp_roles;
-
-		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-
 		$roles = array(
 			'none' => __( 'No Role (Remove All Roles)', 'user-role-expiration-manager' ),
 		);
 
-		foreach ( $wp_roles->get_names() as $role_key => $role_name ) {
-			$roles[ $role_key ] = translate_user_role( $role_name );
+		$editable_roles = function_exists( 'get_editable_roles' ) ? get_editable_roles() : array();
+
+		if ( ! empty( $editable_roles ) ) {
+			foreach ( $editable_roles as $role_key => $role_data ) {
+				$roles[ $role_key ] = translate_user_role( $role_data['name'] );
+			}
+		} else {
+			global $wp_roles;
+			if ( ! isset( $wp_roles ) ) {
+				$wp_roles = new WP_Roles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+			foreach ( $wp_roles->get_names() as $role_key => $role_name ) {
+				$roles[ $role_key ] = translate_user_role( $role_name );
+			}
 		}
 
 		/**

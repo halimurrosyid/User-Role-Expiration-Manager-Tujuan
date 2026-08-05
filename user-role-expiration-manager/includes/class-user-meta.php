@@ -46,7 +46,8 @@ class User_Meta {
 	 * @return void
 	 */
 	public static function render_user_profile_fields( \WP_User $user ): void {
-		if ( ! current_user_can( 'edit_users' ) && get_current_user_id() !== $user->ID ) {
+		// Strictly restrict to users with edit_users capability
+		if ( ! current_user_can( 'edit_users' ) ) {
 			return;
 		}
 
@@ -87,6 +88,8 @@ class User_Meta {
 		update_user_meta( $user_id, Expiration::META_DURATION, $duration );
 		update_user_meta( $user_id, Expiration::META_UNIT, $unit );
 		update_user_meta( $user_id, Expiration::META_ROLE, $role );
+
+		Expiration::update_expiration_timestamp_meta( $user_id );
 	}
 
 	/**
@@ -103,11 +106,17 @@ class User_Meta {
 		check_admin_referer( 'urem_reset_start_date_' . $user_id, 'urem_nonce' );
 
 		if ( $user_id ) {
-			update_user_meta( $user_id, Expiration::META_START, current_time( 'Y-m-d H:i:s' ) );
-			Logger::add_log( $user_id, get_userdata( $user_id )->user_email, '', '', 'reset', __( 'Expiration start date reset to current time.', 'user-role-expiration-manager' ) );
+			$now = current_time( 'Y-m-d H:i:s' );
+			update_user_meta( $user_id, Expiration::META_START, $now );
+			Expiration::update_expiration_timestamp_meta( $user_id );
+
+			$user = get_userdata( $user_id );
+			$email = $user ? $user->user_email : '';
+			Logger::add_log( $user_id, $email, '', '', 'reset', __( 'Expiration start date reset to current time.', 'user-role-expiration-manager' ) );
 		}
 
-		wp_safe_redirect( get_edit_user_link( $user_id ) );
+		$redirect = add_query_arg( 'urem_action_performed', 'reset_success', get_edit_user_link( $user_id ) );
+		wp_safe_redirect( $redirect );
 		exit;
 	}
 
@@ -126,9 +135,11 @@ class User_Meta {
 
 		if ( $user_id ) {
 			Expiration::process_user_expiration( $user_id, 'manual_single' );
+			Expiration::update_expiration_timestamp_meta( $user_id );
 		}
 
-		wp_safe_redirect( get_edit_user_link( $user_id ) );
+		$redirect = add_query_arg( 'urem_action_performed', 'expire_success', get_edit_user_link( $user_id ) );
+		wp_safe_redirect( $redirect );
 		exit;
 	}
 
@@ -145,7 +156,7 @@ class User_Meta {
 
 		$actions['urem_bulk_enable']  = __( 'Enable Expiration', 'user-role-expiration-manager' );
 		$actions['urem_bulk_disable'] = __( 'Disable Expiration', 'user-role-expiration-manager' );
-		$actions['urem_bulk_reset']   = __( 'Reset Start Date', 'user-role-expiration-manager' );
+		$actions['urem_bulk_reset']   = __( 'Reset Tanggal Mulai', 'user-role-expiration-manager' );
 		$actions['urem_bulk_expire']  = __( 'Expire Sekarang', 'user-role-expiration-manager' );
 
 		return $actions;
@@ -169,14 +180,18 @@ class User_Meta {
 		switch ( $action ) {
 			case 'urem_bulk_enable':
 				foreach ( $user_ids as $id ) {
-					update_user_meta( (int) $id, Expiration::META_ENABLED, '1' );
+					$id = (int) $id;
+					update_user_meta( $id, Expiration::META_ENABLED, '1' );
+					Expiration::update_expiration_timestamp_meta( $id );
 					$processed++;
 				}
 				break;
 
 			case 'urem_bulk_disable':
 				foreach ( $user_ids as $id ) {
-					update_user_meta( (int) $id, Expiration::META_ENABLED, '0' );
+					$id = (int) $id;
+					update_user_meta( $id, Expiration::META_ENABLED, '0' );
+					Expiration::update_expiration_timestamp_meta( $id );
 					$processed++;
 				}
 				break;
@@ -184,14 +199,18 @@ class User_Meta {
 			case 'urem_bulk_reset':
 				$now = current_time( 'Y-m-d H:i:s' );
 				foreach ( $user_ids as $id ) {
-					update_user_meta( (int) $id, Expiration::META_START, $now );
+					$id = (int) $id;
+					update_user_meta( $id, Expiration::META_START, $now );
+					Expiration::update_expiration_timestamp_meta( $id );
 					$processed++;
 				}
 				break;
 
 			case 'urem_bulk_expire':
 				foreach ( $user_ids as $id ) {
-					if ( Expiration::process_user_expiration( (int) $id, 'bulk_action' ) ) {
+					$id = (int) $id;
+					if ( Expiration::process_user_expiration( $id, 'bulk_action' ) ) {
+						Expiration::update_expiration_timestamp_meta( $id );
 						$processed++;
 					}
 				}
@@ -211,11 +230,20 @@ class User_Meta {
 	}
 
 	/**
-	 * Render admin notices after bulk action execution.
+	 * Render admin notices after single/bulk action execution.
 	 *
 	 * @return void
 	 */
 	public static function render_bulk_action_notices(): void {
+		if ( ! empty( $_GET['urem_action_performed'] ) ) {
+			$action = sanitize_text_field( wp_unslash( $_GET['urem_action_performed'] ) );
+			if ( 'reset_success' === $action ) {
+				printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html__( 'Tanggal mulai expiration berhasil di-reset ke waktu saat ini.', 'user-role-expiration-manager' ) );
+			} elseif ( 'expire_success' === $action ) {
+				printf( '<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html__( 'Role pengguna berhasil di-expire sekarang.', 'user-role-expiration-manager' ) );
+			}
+		}
+
 		if ( empty( $_GET['urem_bulk_performed'] ) || ! isset( $_GET['urem_bulk_count'] ) ) {
 			return;
 		}
