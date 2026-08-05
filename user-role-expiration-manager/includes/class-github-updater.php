@@ -128,7 +128,7 @@ class GitHub_Updater {
 		if ( version_compare( $this->current_version, $new_version, '<' ) ) {
 			$download_url = ! empty( $release->zipball_url ) ? $release->zipball_url : '';
 
-			// Check asset zip attachment if present (Compatible with PHP 7.x and 8.x)
+			// Check asset zip attachment if present
 			if ( ! empty( $release->assets ) && is_array( $release->assets ) ) {
 				foreach ( $release->assets as $asset ) {
 					if ( isset( $asset->browser_download_url ) && '.zip' === substr( $asset->name, -4 ) ) {
@@ -138,8 +138,10 @@ class GitHub_Updater {
 				}
 			}
 
+			$slug = basename( dirname( UREM_PLUGIN_FILE ) );
+
 			$plugin_data = array(
-				'slug'        => dirname( $this->plugin_basename ),
+				'slug'        => $slug,
 				'plugin'      => $this->plugin_basename,
 				'new_version' => $new_version,
 				'url'         => 'https://github.com/' . $this->repository,
@@ -165,7 +167,7 @@ class GitHub_Updater {
 			return $result;
 		}
 
-		$slug = dirname( $this->plugin_basename );
+		$slug = basename( dirname( UREM_PLUGIN_FILE ) );
 		if ( ! isset( $args->slug ) || $args->slug !== $slug ) {
 			return $result;
 		}
@@ -210,7 +212,7 @@ class GitHub_Updater {
 			return $result;
 		}
 
-		$correct_folder = WP_PLUGIN_DIR . '/' . dirname( $this->plugin_basename );
+		$correct_folder = WP_PLUGIN_DIR . '/' . basename( dirname( UREM_PLUGIN_FILE ) );
 
 		if ( isset( $result['destination'] ) && $result['destination'] !== $correct_folder ) {
 			global $wp_filesystem;
