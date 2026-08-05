@@ -21,7 +21,7 @@ class Logger {
 	 *
 	 * @return string
 	 */
-	public static function get_table_name(): string {
+	public static function get_table_name() {
 		global $wpdb;
 		return $wpdb->prefix . 'urem_logs';
 	}
@@ -31,7 +31,7 @@ class Logger {
 	 *
 	 * @return void
 	 */
-	public static function create_table(): void {
+	public static function create_table() {
 		global $wpdb;
 
 		$table_name      = self::get_table_name();
@@ -45,7 +45,7 @@ class Logger {
 			new_role varchar(50) NOT NULL DEFAULT '',
 			trigger_type varchar(50) NOT NULL DEFAULT 'cron',
 			reason text DEFAULT NULL,
-			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			created_at datetime DEFAULT '1000-01-01 00:00:00' NOT NULL,
 			PRIMARY KEY  (id),
 			KEY user_id (user_id),
 			KEY created_at (created_at)
@@ -66,7 +66,7 @@ class Logger {
 	 * @param string $reason Text reason summary.
 	 * @return bool Success boolean.
 	 */
-	public static function add_log( int $user_id, string $user_email, string $old_role, string $new_role, string $trigger_type, string $reason ): bool {
+	public static function add_log( $user_id, $user_email, $old_role, $new_role, $trigger_type, $reason ) {
 		$settings = Settings::get_settings();
 		if ( empty( $settings['enable_logging'] ) ) {
 			return false;
@@ -79,7 +79,7 @@ class Logger {
 		$inserted = $wpdb->insert(
 			$table_name,
 			array(
-				'user_id'      => $user_id,
+				'user_id'      => absint( $user_id ),
 				'user_email'   => sanitize_email( $user_email ),
 				'old_role'     => sanitize_text_field( $old_role ),
 				'new_role'     => sanitize_text_field( $new_role ),
@@ -101,7 +101,7 @@ class Logger {
 	 * @param string $search Optional search term.
 	 * @return array Array of objects.
 	 */
-	public static function get_logs( int $limit = 20, int $offset = 0, string $search = '' ): array {
+	public static function get_logs( $limit = 20, $offset = 0, $search = '' ) {
 		global $wpdb;
 
 		$table_name = self::get_table_name();
@@ -118,8 +118,8 @@ class Logger {
 		}
 
 		$sql = "SELECT * FROM $table_name $where ORDER BY id DESC LIMIT %d OFFSET %d";
-		$params[] = $limit;
-		$params[] = $offset;
+		$params[] = absint( $limit );
+		$params[] = absint( $offset );
 
 		return $wpdb->get_results( $wpdb->prepare( $sql, $params ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
@@ -130,7 +130,7 @@ class Logger {
 	 * @param string $search Optional search term.
 	 * @return int Total log count.
 	 */
-	public static function get_logs_count( string $search = '' ): int {
+	public static function get_logs_count( $search = '' ) {
 		global $wpdb;
 
 		$table_name = self::get_table_name();
@@ -159,7 +159,7 @@ class Logger {
 	 *
 	 * @return bool
 	 */
-	public static function clear_logs(): bool {
+	public static function clear_logs() {
 		global $wpdb;
 		$table_name = self::get_table_name();
 
@@ -171,7 +171,7 @@ class Logger {
 	 *
 	 * @return void
 	 */
-	public static function export_csv_logs(): void {
+	public static function export_csv_logs() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Unauthorized user.', 'user-role-expiration-manager' ) );
 		}

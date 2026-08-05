@@ -21,14 +21,14 @@ final class Plugin {
 	 *
 	 * @var Plugin|null
 	 */
-	private static ?Plugin $instance = null;
+	private static $instance = null;
 
 	/**
 	 * Main Instance Singleton Pattern.
 	 *
 	 * @return Plugin
 	 */
-	public static function get_instance(): Plugin {
+	public static function get_instance() {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
@@ -49,7 +49,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	private function define_constants(): void {
+	private function define_constants() {
 		if ( ! defined( 'UREM_VERSION' ) ) {
 			define( 'UREM_VERSION', '1.0.0' );
 		}
@@ -63,7 +63,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	private function load_dependencies(): void {
+	private function load_dependencies() {
 		require_once UREM_PLUGIN_DIR . 'includes/helpers.php';
 	}
 
@@ -72,7 +72,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	private function init_hooks(): void {
+	private function init_hooks() {
 		// Component Initializations
 		Settings::init();
 		Admin::init();
@@ -94,7 +94,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	public function load_textdomain(): void {
+	public function load_textdomain() {
 		load_plugin_textdomain(
 			'user-role-expiration-manager',
 			false,
@@ -107,7 +107,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	public static function activate(): void {
+	public static function activate() {
 		Logger::create_table();
 		Cron::schedule_cron();
 
@@ -126,7 +126,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	public static function deactivate(): void {
+	public static function deactivate() {
 		Cron::unschedule_cron();
 		delete_site_transient( 'urem_github_release_info' );
 	}

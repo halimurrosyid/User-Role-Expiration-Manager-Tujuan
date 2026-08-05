@@ -21,35 +21,35 @@ class GitHub_Updater {
 	 *
 	 * @var string
 	 */
-	private string $repository;
+	private $repository;
 
 	/**
 	 * Plugin basename (folder/file.php).
 	 *
 	 * @var string
 	 */
-	private string $plugin_basename;
+	private $plugin_basename;
 
 	/**
 	 * Current plugin version.
 	 *
 	 * @var string
 	 */
-	private string $current_version;
+	private $current_version;
 
 	/**
 	 * Transient key for caching API response.
 	 *
 	 * @var string
 	 */
-	private string $transient_key = 'urem_github_release_info';
+	private $transient_key = 'urem_github_release_info';
 
 	/**
 	 * Constructor.
 	 *
-	 * @param string $repository Repository path e.g. 'halimurrosyid/User-Role-Expiration-Manager'.
+	 * @param string $repository Repository path e.g. 'halimurrosyid/User-Role-Expiration-Manager-Tujuan'.
 	 */
-	public function __construct( string $repository ) {
+	public function __construct( $repository ) {
 		$this->repository      = $repository;
 		$this->plugin_basename = plugin_basename( UREM_PLUGIN_FILE );
 		$this->current_version = UREM_VERSION;
@@ -60,7 +60,7 @@ class GitHub_Updater {
 	 *
 	 * @return void
 	 */
-	public function init(): void {
+	public function init() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_update' ) );
 		add_filter( 'plugins_api', array( $this, 'plugin_popup_info' ), 20, 3 );
 		add_filter( 'upgrader_post_install', array( $this, 'post_install_rename_folder' ), 10, 3 );
@@ -71,7 +71,7 @@ class GitHub_Updater {
 	 *
 	 * @return object|null Release info object or null on failure.
 	 */
-	private function get_github_release_info(): ?object {
+	private function get_github_release_info() {
 		$cached = get_site_transient( $this->transient_key );
 		if ( false !== $cached && is_object( $cached ) ) {
 			return $cached;
@@ -128,10 +128,10 @@ class GitHub_Updater {
 		if ( version_compare( $this->current_version, $new_version, '<' ) ) {
 			$download_url = ! empty( $release->zipball_url ) ? $release->zipball_url : '';
 
-			// Check asset zip attachment if present
+			// Check asset zip attachment if present (Compatible with PHP 7.x and 8.x)
 			if ( ! empty( $release->assets ) && is_array( $release->assets ) ) {
 				foreach ( $release->assets as $asset ) {
-					if ( isset( $asset->browser_download_url ) && str_ends_with( $asset->name, '.zip' ) ) {
+					if ( isset( $asset->browser_download_url ) && '.zip' === substr( $asset->name, -4 ) ) {
 						$download_url = $asset->browser_download_url;
 						break;
 					}
@@ -160,7 +160,7 @@ class GitHub_Updater {
 	 * @param object      $args Query args.
 	 * @return object|bool
 	 */
-	public function plugin_popup_info( $result, string $action, $args ) {
+	public function plugin_popup_info( $result, $action, $args ) {
 		if ( 'plugin_information' !== $action ) {
 			return $result;
 		}
@@ -205,7 +205,7 @@ class GitHub_Updater {
 	 * @param array $result Result info.
 	 * @return array Modified result info.
 	 */
-	public function post_install_rename_folder( bool $response, array $hook_extra, array $result ): array {
+	public function post_install_rename_folder( $response, $hook_extra, $result ) {
 		if ( ! isset( $hook_extra['plugin'] ) || $hook_extra['plugin'] !== $this->plugin_basename ) {
 			return $result;
 		}
