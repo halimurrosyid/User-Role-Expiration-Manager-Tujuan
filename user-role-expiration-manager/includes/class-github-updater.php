@@ -2,6 +2,8 @@
 /**
  * Self-Hosted GitHub Automatic Updater.
  *
+ * Supports both GitHub Releases API and fallback direct GitHub Main Branch updates.
+ *
  * @package UserRoleExpirationManager
  */
 
@@ -67,7 +69,7 @@ class GitHub_Updater {
 	}
 
 	/**
-	 * Fetch release data from GitHub API.
+	 * Fetch release data from GitHub API with fallback to main branch header.
 	 *
 	 * @return object|null Release info object or null on failure.
 	 */
@@ -77,8 +79,8 @@ class GitHub_Updater {
 			return $cached;
 		}
 
-		$url = 'https://api.github.com/repos/' . $this->repository . '/releases/latest';
-
+		// Strategy 1: Check GitHub Releases API
+		$url      = 'https://api.github.com/repos/' . $this->repository . '/releases/latest';
 		$response = wp_remote_get(
 			$url,
 			array(
@@ -90,21 +92,38 @@ class GitHub_Updater {
 			)
 		);
 
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return null;
+		if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+			$body = wp_remote_retrieve_body( $response );
+			$data = json_decode( $body );
+
+			if ( ! empty( $data->tag_name ) ) {
+				set_site_transient( $this->transient_key, $data, 6 * HOUR_IN_SECONDS );
+				return $data;
+			}
 		}
 
-		$body = wp_remote_retrieve_body( $response );
-		$data = json_decode( $body );
+		// Strategy 2: Fallback to direct raw GitHub main branch header parsing
+		$raw_url  = 'https://raw.githubusercontent.com/' . $this->repository . '/main/user-role-expiration-manager/user-role-expiration-manager.php';
+		$raw_resp = wp_remote_get( $raw_url, array( 'timeout' => 10 ) );
 
-		if ( empty( $data->tag_name ) ) {
-			return null;
+		if ( ! is_wp_error( $raw_resp ) && 200 === wp_remote_retrieve_response_code( $raw_resp ) ) {
+			$content = wp_remote_retrieve_body( $raw_resp );
+
+			if ( preg_match( '/Version:\s*([0-9\.]+)/i', $content, $matches ) ) {
+				$remote_version = trim( $matches[1] );
+				$fallback_data  = (object) array(
+					'tag_name'     => 'v' . $remote_version,
+					'zipball_url'  => 'https://github.com/' . $this->repository . '/archive/refs/heads/main.zip',
+					'body'         => 'Pembaruan otomatis dari branch main GitHub repository.',
+					'is_fallback'  => true,
+				);
+
+				set_site_transient( $this->transient_key, $fallback_data, 30 * MINUTE_IN_SECONDS );
+				return $fallback_data;
+			}
 		}
 
-		// Cache for 6 hours
-		set_site_transient( $this->transient_key, $data, 6 * HOUR_IN_SECONDS );
-
-		return $data;
+		return null;
 	}
 
 	/**
@@ -185,9 +204,9 @@ class GitHub_Updater {
 		$res->version       = $new_version;
 		$res->author        = '<a href="https://it.telkomuniversity.ac.id/" target="_blank">Mujaddid Halimurrosyid</a>';
 		$res->homepage      = 'https://github.com/' . $this->repository;
-		$res->requires      = '6.8';
+		$res->requires      = '5.8';
 		$res->tested        = get_bloginfo( 'version' );
-		$res->requires_php  = '8.1';
+		$res->requires_php  = '7.4';
 		$res->download_link = ! empty( $release->zipball_url ) ? $release->zipball_url : '';
 
 		$changelog_content  = ! empty( $release->body ) ? wp_kses_post( nl2br( $release->body ) ) : esc_html__( 'Maintenance update and bug fixes.', 'user-role-expiration-manager' );
@@ -216,7 +235,16 @@ class GitHub_Updater {
 
 		if ( isset( $result['destination'] ) && $result['destination'] !== $correct_folder ) {
 			global $wp_filesystem;
-			$wp_filesystem->move( $result['destination'], $correct_folder );
+
+			// Handle nested plugin folder inside github archive zip if needed
+			$inner_plugin_dir = $result['destination'] . '/user-role-expiration-manager';
+			if ( $wp_filesystem->is_dir( $inner_plugin_dir ) ) {
+				$wp_filesystem->move( $inner_plugin_dir, $correct_folder );
+				$wp_filesystem->delete( $result['destination'], true );
+			} else {
+				$wp_filesystem->move( $result['destination'], $correct_folder );
+			}
+
 			$result['destination'] = $correct_folder;
 		}
 
