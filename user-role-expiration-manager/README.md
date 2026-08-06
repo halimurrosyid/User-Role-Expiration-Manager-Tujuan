@@ -11,7 +11,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.0.5
+- **Versi**: 1.0.6
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,6 +21,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
+- **Native Update Row Injector**: Penambahan hook `after_plugin_row_*` untuk menjamin baris notifikasi update warna kuning selalu tampil 100% pada tabel plugins.
 - **Modern 2-Column Responsive Layout**: Desain tata letak 2 kolom profesional pada layar desktop yang memanfaatkan area kanan dengan widget informasi, ringkasan statistik, dan tautan pintas.
 - **Automatic Upgrader Source Selection Filter**: Penambahan filter `upgrader_source_selection` untuk memutus masalah pengekstrakan folder zip repository GitHub secara seamless.
 - **Visual DateTime Calendar Picker**: Picker tanggal & jam kalender interaktif untuk memudahkan pengisian Tanggal Mulai.
@@ -59,7 +60,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
    ```
 2. Buka dashboard WordPress admin -> **Plugin** -> **Plugin Terpasang**.
 3. Cari **User Role Expiration Manager** dan klik **Aktifkan**.
-4. **Update Otomatis**: Plugin sudah dilengkapi dengan fitur *GitHub Automatic Updater*. Saat ada versi rilis baru di repository GitHub, pemberitahuan update akan otomatis muncul di menu **Dashboard** -> **Pembaruan (Updates)** WordPress dan dapat di-update dengan 1-klik tanpa perlu melakukan upload ulang secara manual!
+4. **Update Otomatis**: Plugin sudah dilengkapi dengan fitur *GitHub Automatic Updater*. Saat ada versi rilis baru di GitHub, pemberitahuan update akan otomatis muncul di menu **Dashboard** -> **Pembaruan (Updates)** WordPress dan dapat di-update dengan 1-klik tanpa perlu melakukan upload ulang secara manual!
 
 ---
 
@@ -90,9 +91,11 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 
 ## 📝 Changelog
 
+### Version 1.0.6 (2026-08-06)
+- **Native Row Notice Injector**: Penambahan hook `after_plugin_row_*` untuk menjamin baris notifikasi update warna kuning beserta tombol *Perbarui Sekarang* selalu tampil 100% pada tabel plugins setelah tombol *Cek Update GitHub* diklik.
+
 ### Version 1.0.5 (2026-08-06)
 - **UI Redesign**: Tata letak 2 kolom profesional (*2-Column Layout*) pada layar desktop, menambahkan Sidebar Kartu Informasi Plugin, Ringkasan Statistik Expiration, dan Tombol Akses Pintas.
-- **Auto Upgrader Test**: Rilis versi `1.0.5` di GitHub untuk menguji coba fitur pembaruan otomatis 1-klik yang telah diperbaiki.
 
 ### Version 1.0.4 (2026-08-06)
 - **Automatic Upgrader Fix**: Menambahkan filter `upgrader_source_selection` untuk menangani rute pengekstrakan folder zip repository GitHub secara otomatis sehingga pesan error *The package could not be installed* teratasi 100%.
@@ -106,7 +109,7 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 - **Dual Transient Strategy**: Penggabungan rilis GitHub API + pemicu `pre_set_site_transient_update_plugins` & `site_transient_update_plugins`.
 
 ### Version 1.0.1 (2026-08-06)
-- **Feature Update**: Menambahkan **Fitur Preset Cepat (Quick Presets)** durasi (7 Hari, 1 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) pada Global Settings dan Edit User page.
+- **Feature Update**: Menambahkan **Fitur Preset Cepat (Quick Presets)** durasi (7 Hari, 14 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) pada Global Settings dan Edit User page.
 - **Compatibility Improvement**: Optimasi penuh kompatibilitas direktori ZIP dan auto-loader untuk server Linux WordPress.
 
 ### Version 1.0.0 (2026-08-05)

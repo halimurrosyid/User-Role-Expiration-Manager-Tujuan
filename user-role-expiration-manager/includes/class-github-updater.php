@@ -3,7 +3,7 @@
  * Self-Hosted GitHub Automatic Updater.
  *
  * Supports GitHub Releases API, direct raw main branch header fallback, force check trigger,
- * and upgrader_source_selection folder routing.
+ * upgrader_source_selection folder routing, and native row notice injection.
  *
  * @package UserRoleExpirationManager
  */
@@ -68,6 +68,9 @@ class GitHub_Updater {
 		add_filter( 'site_transient_update_plugins', array( $this, 'check_update' ) );
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_update' ) );
 		add_filter( 'plugins_api', array( $this, 'plugin_popup_info' ), 20, 3 );
+
+		// Render native yellow update row on plugins.php page
+		add_action( 'after_plugin_row_' . $this->plugin_basename, array( $this, 'show_update_notification_row' ), 10, 2 );
 
 		// Fix unzipped archive source selection & folder structure
 		add_filter( 'upgrader_source_selection', array( $this, 'fix_upgrader_source_selection' ), 10, 4 );
@@ -194,6 +197,64 @@ class GitHub_Updater {
 	}
 
 	/**
+	 * Render native yellow update notification row on plugins.php page.
+	 *
+	 * @param string $file Plugin file name.
+	 * @param array  $plugin_data Plugin header data.
+	 * @return void
+	 */
+	public function show_update_notification_row( $file, $plugin_data ) {
+		$release = $this->get_github_release_info();
+		if ( ! $release ) {
+			return;
+		}
+
+		$new_version = ltrim( $release->tag_name, 'v' );
+		if ( ! version_compare( $this->current_version, $new_version, '<' ) ) {
+			return;
+		}
+
+		$slug        = basename( dirname( UREM_PLUGIN_FILE ) );
+		$details_url = add_query_arg(
+			array(
+				'tab'       => 'plugin-information',
+				'plugin'    => $slug,
+				'TB_iframe' => 'true',
+				'width'     => '600',
+				'height'    => '550',
+			),
+			self_admin_url( 'plugin-install.php' )
+		);
+
+		$update_url = wp_nonce_url(
+			self_admin_url( 'update.php?action=upgrade-plugin&plugin=' . $file ),
+			'upgrade-plugin_' . $file
+		);
+
+		$wp_list_table = _get_list_table( 'WP_Plugins_List_Table' );
+		$column_count  = $wp_list_table ? $wp_list_table->get_column_count() : 4;
+
+		add_thickbox();
+
+		echo '<tr class="plugin-update-tr active" id="' . esc_attr( $slug ) . '-update" data-slug="' . esc_attr( $slug ) . '" data-plugin="' . esc_attr( $file ) . '">';
+		echo '<td colspan="' . esc_attr( (string) $column_count ) . '" class="plugin-update colspanchange">';
+		echo '<div class="update-message notice inline notice-warning notice-alt">';
+		echo '<p>';
+		printf(
+			/* translators: 1: Plugin name, 2: Version number, 3: View details link, 4: Update link */
+			esc_html__( 'Terdapat versi baru dari %1$s (%2$s) tersedia. %3$s atau %4$s.', 'user-role-expiration-manager' ),
+			'<strong>User Role Expiration Manager</strong>',
+			esc_html( $new_version ),
+			sprintf( '<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s">%s</a>', esc_url( $details_url ), esc_attr__( 'Lihat rincian versi', 'user-role-expiration-manager' ), sprintf( __( 'Lihat rincian versi %s', 'user-role-expiration-manager' ), esc_html( $new_version ) ) ),
+			sprintf( '<a href="%s" class="update-link" aria-label="%s">%s</a>', esc_url( $update_url ), esc_attr__( 'Perbarui Sekarang', 'user-role-expiration-manager' ), esc_html__( 'Perbarui Sekarang', 'user-role-expiration-manager' ) )
+		);
+		echo '</p>';
+		echo '</div>';
+		echo '</td>';
+		echo '</tr>';
+	}
+
+	/**
 	 * Route WordPress upgrader to the correct inner plugin source directory inside downloaded archive.
 	 *
 	 * @param string $source Unzipped source directory path.
@@ -311,7 +372,36 @@ class GitHub_Updater {
 		delete_site_transient( $this->transient_key );
 		delete_site_transient( 'update_plugins' );
 
-		$this->get_github_release_info( true );
+		// Force fetch fresh info
+		$release = $this->get_github_release_info( true );
+
+		// Force update plugins transient save
+		if ( $release ) {
+			$new_version = ltrim( $release->tag_name, 'v' );
+			if ( version_compare( $this->current_version, $new_version, '<' ) ) {
+				$transient = get_site_transient( 'update_plugins' );
+				if ( ! is_object( $transient ) ) {
+					$transient = new \stdClass();
+				}
+				$slug        = basename( dirname( UREM_PLUGIN_FILE ) );
+				$plugin_data = (object) array(
+					'id'          => 'https://github.com/' . $this->repository,
+					'slug'        => $slug,
+					'plugin'      => $this->plugin_basename,
+					'new_version' => $new_version,
+					'url'         => 'https://github.com/' . $this->repository,
+					'package'     => ! empty( $release->zipball_url ) ? $release->zipball_url : '',
+					'tested'      => get_bloginfo( 'version' ),
+					'requires'    => '5.8',
+					'requires_php'=> '7.4',
+				);
+				if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
+					$transient->response = array();
+				}
+				$transient->response[ $this->plugin_basename ] = $plugin_data;
+				set_site_transient( 'update_plugins', $transient );
+			}
+		}
 
 		$redirect_url = add_query_arg(
 			array(
