@@ -175,6 +175,8 @@ class Expiration {
 	/**
 	 * Execute role expiration transition for a user.
 	 *
+	 * Includes safety guards to prevent Administrator self-expiration.
+	 *
 	 * @param int    $user_id User ID.
 	 * @param string $trigger Trigger source ('cron', 'manual_scan', 'manual_single', 'bulk_action').
 	 * @return bool Success status.
@@ -185,15 +187,26 @@ class Expiration {
 			return false;
 		}
 
+		// SAFETY GUARD 1: Prevent current logged-in Administrator from expiring their own account
+		if ( is_user_logged_in() && get_current_user_id() === $user_id && current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
 		$data = self::get_user_expiration_data( $user_id );
 
 		// Retrieve primary old role
-		$old_roles  = (array) $user->roles;
-		$old_role   = ! empty( $old_roles ) ? reset( $old_roles ) : 'none';
+		$old_roles   = (array) $user->roles;
+		$old_role    = ! empty( $old_roles ) ? reset( $old_roles ) : 'none';
 		$target_role = $data['role'];
 
 		// Do not process if target role is identical to current role
 		if ( $old_role === $target_role ) {
+			return false;
+		}
+
+		// SAFETY GUARD 2: Filter hook allowing custom role exclusion
+		$should_expire = apply_filters( 'urem_should_expire_user', true, $user_id, $old_role, $target_role, $trigger );
+		if ( ! $should_expire ) {
 			return false;
 		}
 
