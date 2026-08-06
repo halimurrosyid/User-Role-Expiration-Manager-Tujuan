@@ -24,11 +24,15 @@ if ( ! empty( $data['start'] ) ) {
 if ( empty( $formatted_start ) ) {
 	$formatted_start = wp_date( 'Y-m-d\TH:i', current_time( 'timestamp' ) );
 }
+
+// Fetch last 5 logs for this specific user
+$user_logs_data = \UserRoleExpirationManager\Logger::get_logs( (string) $user->ID, 1, 5 );
+$user_logs      = $user_logs_data['items'];
 ?>
 
 <div class="urem-user-profile-section card" style="max-width: 800px; margin-top: 20px; padding: 15px 20px;">
 	<h2>
-		<span class="dashicons dashicons-clock" style="vertical-align: middle; margin-right: 6px;"></span>
+		<span class="dashicons dashicons-clock" style="vertical-align: middle; margin-right: 6px; color: #2271b1;"></span>
 		<?php esc_html_e( 'Role Expiration', 'user-role-expiration-manager' ); ?>
 	</h2>
 
@@ -152,4 +156,35 @@ if ( empty( $formatted_start ) ) {
 			</tr>
 		</tbody>
 	</table>
+
+	<!-- User Specific Expiration Log History -->
+	<?php if ( ! empty( $user_logs ) ) : ?>
+		<hr style="margin: 20px 0; border: none; border-top: 1px solid #f0f0f1;">
+		<h3 style="margin-bottom: 10px; font-size: 14px; color: #1d2327;">
+			<span class="dashicons dashicons-history" style="vertical-align: middle; margin-right: 4px; color: #2271b1;"></span>
+			<?php esc_html_e( 'Riwayat Expiration Pengguna Ini', 'user-role-expiration-manager' ); ?>
+		</h3>
+		<table class="widefat striped" style="font-size: 12px;">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Waktu', 'user-role-expiration-manager' ); ?></th>
+					<th><?php esc_html_e( 'Role Lama', 'user-role-expiration-manager' ); ?></th>
+					<th><?php esc_html_e( 'Role Baru', 'user-role-expiration-manager' ); ?></th>
+					<th><?php esc_html_e( 'Trigger', 'user-role-expiration-manager' ); ?></th>
+					<th><?php esc_html_e( 'Keterangan', 'user-role-expiration-manager' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ( $user_logs as $log ) : ?>
+					<tr>
+						<td><?php echo esc_html( urem_format_datetime( $log->created_at ) ); ?></td>
+						<td><span class="urem-badge urem-badge-gray"><?php echo esc_html( $log->old_role ? $log->old_role : '-' ); ?></span></td>
+						<td><span class="urem-badge urem-badge-green"><?php echo esc_html( $log->new_role ? $log->new_role : '-' ); ?></span></td>
+						<td><code><?php echo esc_html( $log->trigger_type ); ?></code></td>
+						<td><?php echo esc_html( $log->reason ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+	<?php endif; ?>
 </div>

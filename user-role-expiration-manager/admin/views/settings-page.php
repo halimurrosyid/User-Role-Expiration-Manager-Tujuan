@@ -189,17 +189,6 @@ $check_update_url = wp_nonce_url( admin_url( 'admin-post.php?action=urem_force_c
 							</td>
 						</tr>
 
-						<!-- Send Email -->
-						<tr>
-							<th scope="row"><?php esc_html_e( 'Notifikasi Email', 'user-role-expiration-manager' ); ?></th>
-							<td>
-								<label for="urem_send_email_on_expire">
-									<input type="checkbox" id="urem_send_email_on_expire" name="urem_settings[send_email_on_expire]" value="1" <?php checked( $settings['send_email_on_expire'], '1' ); ?>>
-									<?php esc_html_e( 'Kirim email pemberitahuan ke pengguna ketika role-nya berhasil diubah.', 'user-role-expiration-manager' ); ?>
-								</label>
-							</td>
-						</tr>
-
 						<!-- Dry Run Mode -->
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Mode Simulasi (Dry Run)', 'user-role-expiration-manager' ); ?></th>
@@ -210,7 +199,95 @@ $check_update_url = wp_nonce_url( admin_url( 'admin-post.php?action=urem_force_c
 								</label>
 							</td>
 						</tr>
+					</tbody>
+				</table>
+			</div>
 
+			<!-- Email Notification Templates Card -->
+			<div class="urem-card">
+				<h2>
+					<span class="dashicons dashicons-email-alt" style="vertical-align: middle; margin-right: 6px; color: #2271b1;"></span>
+					<?php esc_html_e( 'Template Email Notifikasi & Pengingat', 'user-role-expiration-manager' ); ?>
+				</h2>
+				<p class="description" style="margin-bottom: 15px;">
+					<?php esc_html_e( 'Gunakan placeholder berikut untuk mengkustomisasi pesan email: {user_name}, {old_role}, {new_role}, {site_name}, {expiration_date}, {days_left}.', 'user-role-expiration-manager' ); ?>
+				</p>
+
+				<table class="form-table" role="presentation">
+					<tbody>
+						<!-- Send Email on Expire -->
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Notifikasi Email Setelah Expired', 'user-role-expiration-manager' ); ?></th>
+							<td>
+								<label for="urem_send_email_on_expire">
+									<input type="checkbox" id="urem_send_email_on_expire" name="urem_settings[send_email_on_expire]" value="1" <?php checked( $settings['send_email_on_expire'], '1' ); ?>>
+									<strong><?php esc_html_e( 'Kirim email pemberitahuan ke pengguna ketika role-nya berhasil diubah/expired.', 'user-role-expiration-manager' ); ?></strong>
+								</label>
+							</td>
+						</tr>
+
+						<!-- Email Subject -->
+						<tr>
+							<th scope="row"><label for="urem_email_subject"><?php esc_html_e( 'Subjek Email Expired', 'user-role-expiration-manager' ); ?></label></th>
+							<td>
+								<input type="text" id="urem_email_subject" name="urem_settings[email_subject]" class="large-text" value="<?php echo esc_attr( $settings['email_subject'] ); ?>">
+							</td>
+						</tr>
+
+						<!-- Email Message Body -->
+						<tr>
+							<th scope="row"><label for="urem_email_message"><?php esc_html_e( 'Isi Pesan Email Expired', 'user-role-expiration-manager' ); ?></label></th>
+							<td>
+								<textarea id="urem_email_message" name="urem_settings[email_message]" rows="5" class="large-text code"><?php echo esc_textarea( $settings['email_message'] ); ?></textarea>
+							</td>
+						</tr>
+
+						<!-- Send Reminder Email -->
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Email Pengingat Sebelum Expired', 'user-role-expiration-manager' ); ?></th>
+							<td>
+								<label for="urem_send_reminder_email">
+									<input type="checkbox" id="urem_send_reminder_email" name="urem_settings[send_reminder_email]" value="1" <?php checked( $settings['send_reminder_email'], '1' ); ?>>
+									<strong><?php esc_html_e( 'Kirim email peringatan otomatis SEBELUM masa berlaku pengguna habis.', 'user-role-expiration-manager' ); ?></strong>
+								</label>
+								<div style="margin-top: 10px;">
+									<label for="urem_reminder_days_before">
+										<?php esc_html_e( 'Kirim email pengingat ', 'user-role-expiration-manager' ); ?>
+										<input type="number" id="urem_reminder_days_before" name="urem_settings[reminder_days_before]" class="small-text" min="1" max="30" value="<?php echo esc_attr( (string) $settings['reminder_days_before'] ); ?>">
+										<?php esc_html_e( ' hari sebelum tanggal expired.', 'user-role-expiration-manager' ); ?>
+									</label>
+								</div>
+							</td>
+						</tr>
+
+						<!-- Reminder Subject -->
+						<tr>
+							<th scope="row"><label for="urem_reminder_subject"><?php esc_html_e( 'Subjek Email Pengingat', 'user-role-expiration-manager' ); ?></label></th>
+							<td>
+								<input type="text" id="urem_reminder_subject" name="urem_settings[reminder_subject]" class="large-text" value="<?php echo esc_attr( $settings['reminder_subject'] ); ?>">
+							</td>
+						</tr>
+
+						<!-- Reminder Message Body -->
+						<tr>
+							<th scope="row"><label for="urem_reminder_message"><?php esc_html_e( 'Isi Pesan Email Pengingat', 'user-role-expiration-manager' ); ?></label></th>
+							<td>
+								<textarea id="urem_reminder_message" name="urem_settings[reminder_message]" rows="5" class="large-text code"><?php echo esc_textarea( $settings['reminder_message'] ); ?></textarea>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- Logging & Auto-Prune Card -->
+			<div class="urem-card">
+				<h2>
+					<span class="dashicons dashicons-database" style="vertical-align: middle; margin-right: 6px; color: #2271b1;"></span>
+					<?php esc_html_e( 'Pencatatan Log & Pembersihan Otomatis', 'user-role-expiration-manager' ); ?>
+				</h2>
+
+				<table class="form-table" role="presentation">
+					<tbody>
 						<!-- Logging -->
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Catatan Log Database', 'user-role-expiration-manager' ); ?></th>
@@ -219,6 +296,18 @@ $check_update_url = wp_nonce_url( admin_url( 'admin-post.php?action=urem_force_c
 									<input type="checkbox" id="urem_enable_logging" name="urem_settings[enable_logging]" value="1" <?php checked( $settings['enable_logging'], '1' ); ?>>
 									<?php esc_html_e( 'Simpan semua riwayat perubahan role pengguna ke dalam log database.', 'user-role-expiration-manager' ); ?>
 								</label>
+							</td>
+						</tr>
+
+						<!-- Auto-Prune Logs Retention Days -->
+						<tr>
+							<th scope="row">
+								<label for="urem_log_retention_days"><?php esc_html_e( 'Retensi Log (Pembersihan Otomatis)', 'user-role-expiration-manager' ); ?></label>
+							</th>
+							<td>
+								<input type="number" id="urem_log_retention_days" name="urem_settings[log_retention_days]" class="small-text" min="0" max="365" value="<?php echo esc_attr( (string) $settings['log_retention_days'] ); ?>">
+								<?php esc_html_e( 'Hari', 'user-role-expiration-manager' ); ?>
+								<p class="description"><?php esc_html_e( 'Hapus log catatan secara otomatis yang lebih lama dari jumlah hari ini (Isikan 90 hari atau 0 jika tidak ingin menghapus otomatis).', 'user-role-expiration-manager' ); ?></p>
 							</td>
 						</tr>
 					</tbody>

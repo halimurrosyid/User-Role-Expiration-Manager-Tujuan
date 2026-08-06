@@ -11,7 +11,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.0.6
+- **Versi**: 1.1.0
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,7 +21,10 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
-- **Native Update Row Injector**: Penambahan hook `after_plugin_row_*` untuk menjamin baris notifikasi update warna kuning selalu tampil 100% pada tabel plugins.
+- **Kustomisasi Subjek & Pesan Email Notifikasi**: Bebas mengatur subjek dan isi pesan email yang dikirim ke pengguna dengan placeholder dinamis (`{user_name}`, `{old_role}`, `{new_role}`, `{site_name}`, `{expiration_date}`, `{days_left}`).
+- **Email Peringatan Pengingat SEBELUM Expired**: Fitur pengiriman email pengingat otomatis (misal H-3 atau H-7) kepada pengguna sebelum masa berlaku role habis.
+- **Pembersihan Log Otomatis (Auto-Prune Logs)**: Pengaturan retensi log database otomatis (misal menghapus log yang lebih lama dari 90 hari) untuk menjaga ukuran database tetap bersih.
+- **Tabel Riwayat Per User**: Menampilkan riwayat perubahan role per pengguna secara khusus pada halaman edit profil (`user-edit.php`).
 - **Modern 2-Column Responsive Layout**: Desain tata letak 2 kolom profesional pada layar desktop yang memanfaatkan area kanan dengan widget informasi, ringkasan statistik, dan tautan pintas.
 - **Automatic Upgrader Source Selection Filter**: Penambahan filter `upgrader_source_selection` untuk memutus masalah pengekstrakan folder zip repository GitHub secara seamless.
 - **Visual DateTime Calendar Picker**: Picker tanggal & jam kalender interaktif untuk memudahkan pengisian Tanggal Mulai.
@@ -71,18 +74,21 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 - **Enable Plugin**: Aktifkan atau nonaktifkan pemrosesan otomatis.
 - **Default Expiration Duration**: Tentukan durasi default kustom jika tidak menggunakan preset.
 - **Default Role Setelah Expired**: Pilih role tujuan (misalnya `Subscriber` atau `No Role`).
+- **Template Email Notifikasi**: Atur subjek & isi email dengan placeholder `{user_name}`, `{expiration_date}`, dll.
+- **Email Pengingat SEBELUM Expired**: Aktifkan pengiriman email peringatan H-3 atau H-7 sebelum akun expired.
+- **Retensi Log**: Atur jumlah hari penyimpanan log otomatis sebelum dibersihkan.
 - **Jadwal WP-Cron**: Pilih frekuensi pemeriksaan (`Hourly`, `Twice Daily`, `Daily`).
 - **Session Logout**: Aktifkan untuk otomatis mengeluarkan pengguna dari login saat role-nya expired.
-- **Notifikasi Email**: Kirim email pemberitahuan ke pengguna ketika role berubah.
 - **Dry Run Mode**: Mode simulasi untuk menguji pemrosesan role tanpa benar-benar mengubah role user di database.
 
 ### 2. Pengaturan Per Pengguna (`Pengguna` -> `Edit User`)
 Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration**:
 - **Pilih Preset Cepat**: Auto-fill durasi pengguna hanya dengan 1-klik.
 - **Enable Expiration**: Aktifkan/matikan khusus untuk user ini.
-- **Tanggal Mulai**: Tentukan tanggal awal perhitungan.
+- **Tanggal Mulai**: Tentukan tanggal awal perhitungan dengan picker kalender.
 - **Durasi & Satuan**: Set durasi khusus pengguna.
 - **Role Setelah Expired**: Pilih role tujuan khusus.
+- **Tabel Riwayat Per Pengguna**: Menampilkan log riwayat perubahan khusus pengguna ini.
 - **Tombol Action**:
   - `Reset Tanggal Mulai`: Mereset tanggal mulai ke waktu saat ini.
   - `Expire Sekarang`: Langsung mengubah role pengguna saat ini juga.
@@ -90,6 +96,13 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 ---
 
 ## 📝 Changelog
+
+### Version 1.1.0 (2026-08-06)
+- **Major Feature Release**:
+  - **Email Template Editor**: Fitur kustomisasi subjek dan isi pesan email dengan placeholder dinamis.
+  - **Pre-Expiration Email Reminder**: Notifikasi email pengingat otomatis X-hari sebelum role pengguna expired.
+  - **Log Auto-Prune**: Fitur pembersihan log database otomatis berbasis retensi hari.
+  - **User Specific Log History**: Tabel riwayat log perubahan role khusus per-user pada halaman profil edit user.
 
 ### Version 1.0.6 (2026-08-06)
 - **Native Row Notice Injector**: Penambahan hook `after_plugin_row_*` untuk menjamin baris notifikasi update warna kuning beserta tombol *Perbarui Sekarang* selalu tampil 100% pada tabel plugins setelah tombol *Cek Update GitHub* diklik.

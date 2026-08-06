@@ -19,12 +19,13 @@ class Expiration {
 	/**
 	 * Meta key constants.
 	 */
-	public const META_ENABLED   = '_urem_expiration_enabled';
-	public const META_START     = '_urem_expiration_start';
-	public const META_DURATION  = '_urem_expiration_duration';
-	public const META_UNIT      = '_urem_expiration_unit';
-	public const META_ROLE      = '_urem_expiration_role';
-	public const META_TIMESTAMP = '_urem_expiration_ts';
+	public const META_ENABLED       = '_urem_expiration_enabled';
+	public const META_START         = '_urem_expiration_start';
+	public const META_DURATION      = '_urem_expiration_duration';
+	public const META_UNIT          = '_urem_expiration_unit';
+	public const META_ROLE          = '_urem_expiration_role';
+	public const META_TIMESTAMP     = '_urem_expiration_ts';
+	public const META_REMINDER_SENT = '_urem_reminder_sent';
 
 	/**
 	 * Get user expiration metadata with fallback to global settings.
@@ -108,6 +109,10 @@ class Expiration {
 		} else {
 			delete_user_meta( $user_id, self::META_TIMESTAMP );
 		}
+
+		// Reset reminder sent meta if start date changed
+		delete_user_meta( $user_id, self::META_REMINDER_SENT );
+
 		return $ts;
 	}
 
@@ -170,6 +175,62 @@ class Expiration {
 	 */
 	public static function is_user_expired( int $user_id ): bool {
 		return 'expired' === self::get_user_status( $user_id );
+	}
+
+	/**
+	 * Check and send pre-expiration warning email reminders to users.
+	 *
+	 * @param int $user_id User ID.
+	 * @return bool True if reminder sent.
+	 */
+	public static function check_and_send_pre_expiration_reminder( int $user_id ): bool {
+		$settings = Settings::get_settings();
+		if ( empty( $settings['send_reminder_email'] ) ) {
+			return false;
+		}
+
+		$already_sent = get_user_meta( $user_id, self::META_REMINDER_SENT, true );
+		if ( '1' === (string) $already_sent ) {
+			return false;
+		}
+
+		$days_left     = self::get_remaining_days( $user_id );
+		$reminder_days = (int) $settings['reminder_days_before'];
+
+		if ( null === $days_left || $days_left < 0 || $days_left > $reminder_days ) {
+			return false;
+		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			return false;
+		}
+
+		$old_roles   = (array) $user->roles;
+		$old_role    = ! empty( $old_roles ) ? reset( $old_roles ) : 'none';
+		$target_role = get_user_meta( $user_id, self::META_ROLE, true );
+		$exp_ts      = self::get_expiration_timestamp( $user_id );
+
+		$placeholders = array(
+			'{user_name}'       => $user->display_name,
+			'{old_role}'        => $old_role,
+			'{new_role}'        => $target_role,
+			'{site_name}'       => get_bloginfo( 'name' ),
+			'{expiration_date}' => urem_format_datetime( $exp_ts ),
+			'{days_left}'       => (string) max( 0, $days_left ),
+		);
+
+		$subject = strtr( $settings['reminder_subject'], $placeholders );
+		$message = strtr( $settings['reminder_message'], $placeholders );
+
+		$sent = wp_mail( $user->user_email, $subject, $message, array( 'Content-Type: text/plain; charset=UTF-8' ) );
+
+		if ( $sent ) {
+			update_user_meta( $user_id, self::META_REMINDER_SENT, '1' );
+			Logger::add_log( $user_id, $user->user_email, $old_role, $target_role, 'reminder_email', sprintf( __( 'Pre-expiration reminder email sent (%d days left).', 'user-role-expiration-manager' ), $days_left ) );
+		}
+
+		return $sent;
 	}
 
 	/**
@@ -268,7 +329,7 @@ class Expiration {
 	}
 
 	/**
-	 * Send email notification to user upon role expiration.
+	 * Send email notification to user upon role expiration using template settings.
 	 *
 	 * @param \WP_User $user WP_User object.
 	 * @param string   $old_role Previous role.
@@ -276,18 +337,20 @@ class Expiration {
 	 * @return bool Mail send result.
 	 */
 	private static function send_expiration_email( \WP_User $user, string $old_role, string $new_role ): bool {
-		$site_name = get_bloginfo( 'name' );
-		$subject   = sprintf( __( '[%s] Notice: Your User Role Has Expired', 'user-role-expiration-manager' ), $site_name );
+		$settings = Settings::get_settings();
+		$exp_ts   = self::get_expiration_timestamp( $user->ID );
 
-		$message  = sprintf( __( 'Hello %s,', 'user-role-expiration-manager' ), $user->display_name ) . "\r\n\r\n";
-		$message .= sprintf(
-			__( 'Your role on %1$s has reached its expiration date and has been changed from %2$s to %3$s.', 'user-role-expiration-manager' ),
-			$site_name,
-			$old_role,
-			$new_role
-		) . "\r\n\r\n";
-		$message .= __( 'If you believe this is an error or require assistance, please contact the site administrator.', 'user-role-expiration-manager' ) . "\r\n\r\n";
-		$message .= sprintf( __( 'Regards,', 'user-role-expiration-manager' ) ) . "\r\n" . $site_name;
+		$placeholders = array(
+			'{user_name}'       => $user->display_name,
+			'{old_role}'        => $old_role,
+			'{new_role}'        => $new_role,
+			'{site_name}'       => get_bloginfo( 'name' ),
+			'{expiration_date}' => urem_format_datetime( $exp_ts ),
+			'{days_left}'       => '0',
+		);
+
+		$subject = strtr( $settings['email_subject'], $placeholders );
+		$message = strtr( $settings['email_message'], $placeholders );
 
 		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
 
