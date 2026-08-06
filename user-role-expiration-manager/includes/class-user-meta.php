@@ -21,7 +21,7 @@ class User_Meta {
 	 *
 	 * @return void
 	 */
-	public static function init(): void {
+	public static function init() {
 		// User Edit Page Profile Fields
 		add_action( 'show_user_profile', array( __CLASS__, 'render_user_profile_fields' ) );
 		add_action( 'edit_user_profile', array( __CLASS__, 'render_user_profile_fields' ) );
@@ -45,7 +45,7 @@ class User_Meta {
 	 * @param \WP_User $user User object.
 	 * @return void
 	 */
-	public static function render_user_profile_fields( \WP_User $user ): void {
+	public static function render_user_profile_fields( \WP_User $user ) {
 		// Strictly restrict to users with edit_users capability
 		if ( ! current_user_can( 'edit_users' ) ) {
 			return;
@@ -68,7 +68,7 @@ class User_Meta {
 	 * @param int $user_id User ID.
 	 * @return void
 	 */
-	public static function save_user_profile_fields( int $user_id ): void {
+	public static function save_user_profile_fields( $user_id ) {
 		if ( ! current_user_can( 'edit_users' ) ) {
 			return;
 		}
@@ -78,7 +78,17 @@ class User_Meta {
 		}
 
 		$enabled  = ! empty( $_POST['urem_expiration_enabled'] ) ? '1' : '0';
-		$start    = isset( $_POST['urem_expiration_start'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_start'] ) ) : current_time( 'Y-m-d H:i:s' );
+
+		$start_input = isset( $_POST['urem_expiration_start'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_start'] ) ) : '';
+		if ( ! empty( $start_input ) ) {
+			$start = str_replace( 'T', ' ', $start_input );
+			if ( 16 === strlen( $start ) ) {
+				$start .= ':00';
+			}
+		} else {
+			$start = current_time( 'Y-m-d H:i:s' );
+		}
+
 		$duration = isset( $_POST['urem_expiration_duration'] ) ? max( 1, absint( $_POST['urem_expiration_duration'] ) ) : 30;
 		$unit     = isset( $_POST['urem_expiration_unit'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_unit'] ) ) : 'days';
 		$role     = isset( $_POST['urem_expiration_role'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_role'] ) ) : 'subscriber';
@@ -97,7 +107,7 @@ class User_Meta {
 	 *
 	 * @return void
 	 */
-	public static function handle_reset_start_date(): void {
+	public static function handle_reset_start_date() {
 		if ( ! current_user_can( 'edit_users' ) ) {
 			wp_die( esc_html__( 'Unauthorized user.', 'user-role-expiration-manager' ) );
 		}
@@ -125,7 +135,7 @@ class User_Meta {
 	 *
 	 * @return void
 	 */
-	public static function handle_expire_now(): void {
+	public static function handle_expire_now() {
 		if ( ! current_user_can( 'edit_users' ) ) {
 			wp_die( esc_html__( 'Unauthorized user.', 'user-role-expiration-manager' ) );
 		}
@@ -234,7 +244,7 @@ class User_Meta {
 	 *
 	 * @return void
 	 */
-	public static function render_bulk_action_notices(): void {
+	public static function render_bulk_action_notices() {
 		if ( ! empty( $_GET['urem_action_performed'] ) ) {
 			$action = sanitize_text_field( wp_unslash( $_GET['urem_action_performed'] ) );
 			if ( 'reset_success' === $action ) {
