@@ -2,7 +2,8 @@
 /**
  * Self-Hosted GitHub Automatic Updater.
  *
- * Supports GitHub Releases API, direct raw main branch header fallback, and force check trigger.
+ * Supports GitHub Releases API, direct raw main branch header fallback, force check trigger,
+ * and upgrader_source_selection folder routing.
  *
  * @package UserRoleExpirationManager
  */
@@ -67,6 +68,9 @@ class GitHub_Updater {
 		add_filter( 'site_transient_update_plugins', array( $this, 'check_update' ) );
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_update' ) );
 		add_filter( 'plugins_api', array( $this, 'plugin_popup_info' ), 20, 3 );
+
+		// Fix unzipped archive source selection & folder structure
+		add_filter( 'upgrader_source_selection', array( $this, 'fix_upgrader_source_selection' ), 10, 4 );
 		add_filter( 'upgrader_post_install', array( $this, 'post_install_rename_folder' ), 10, 3 );
 
 		// Force check trigger handler via admin-post
@@ -187,6 +191,27 @@ class GitHub_Updater {
 		}
 
 		return $transient;
+	}
+
+	/**
+	 * Route WordPress upgrader to the correct inner plugin source directory inside downloaded archive.
+	 *
+	 * @param string $source Unzipped source directory path.
+	 * @param string $remote_source Remote source path.
+	 * @param object $upgrader WP_Upgrader instance.
+	 * @param array  $hook_extra Hook extra details.
+	 * @return string Corrected source path.
+	 */
+	public function fix_upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra = array() ) {
+		if ( isset( $hook_extra['plugin'] ) && $hook_extra['plugin'] === $this->plugin_basename ) {
+			// Check if unzipped folder contains nested user-role-expiration-manager directory
+			$nested_dir = untrailingslashit( $source ) . '/user-role-expiration-manager/';
+			if ( file_exists( $nested_dir . 'user-role-expiration-manager.php' ) ) {
+				return $nested_dir;
+			}
+		}
+
+		return $source;
 	}
 
 	/**
