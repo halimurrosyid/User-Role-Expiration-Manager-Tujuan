@@ -21,7 +21,7 @@ class User_List_Table {
 	 *
 	 * @return void
 	 */
-	public static function init(): void {
+	public static function init() {
 		add_filter( 'manage_users_columns', array( __CLASS__, 'add_custom_columns' ) );
 		add_filter( 'manage_users_custom_column', array( __CLASS__, 'render_custom_column_content' ), 10, 3 );
 		add_filter( 'manage_users_sortable_columns', array( __CLASS__, 'make_columns_sortable' ) );
@@ -40,7 +40,7 @@ class User_List_Table {
 		$columns['urem_start']       = __( 'Tanggal Mulai', 'user-role-expiration-manager' );
 		$columns['urem_expired']     = __( 'Tanggal Expired', 'user-role-expiration-manager' );
 		$columns['urem_target_role'] = __( 'Role Setelah Expired', 'user-role-expiration-manager' );
-		$columns['urem_status']      = __( 'Status', 'user-role-expiration-manager' );
+		$columns['urem_status']      = __( 'Status Expiration', 'user-role-expiration-manager' );
 		$columns['urem_remaining']   = __( 'Sisa Hari', 'user-role-expiration-manager' );
 
 		return $columns;
@@ -118,7 +118,7 @@ class User_List_Table {
 	 * @param string $which Table position ('top' or 'bottom').
 	 * @return void
 	 */
-	public static function render_expiration_filter_dropdown( string $which ): void {
+	public static function render_expiration_filter_dropdown( $which ) {
 		if ( 'top' !== $which ) {
 			return;
 		}
@@ -141,7 +141,7 @@ class User_List_Table {
 	 * @param \WP_User_Query $query Query object.
 	 * @return void
 	 */
-	public static function filter_users_by_expiration_status( \WP_User_Query $query ): void {
+	public static function filter_users_by_expiration_status( \WP_User_Query $query ) {
 		if ( ! is_admin() ) {
 			return;
 		}
