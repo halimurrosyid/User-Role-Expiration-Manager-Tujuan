@@ -1,63 +1,162 @@
 /**
- * Admin Styles for User Role Expiration Manager.
+ * Admin Stylesheet for User Role Expiration Manager.
  */
 
+/* Main Container & Header */
+.urem-admin-wrap {
+	margin-top: 15px;
+	margin-right: 20px;
+}
+
+.urem-admin-layout {
+	display: flex;
+	gap: 24px;
+	margin-top: 20px;
+	align-items: flex-start;
+}
+
+.urem-main-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.urem-sidebar-content {
+	width: 320px;
+	flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+	.urem-admin-layout {
+		flex-direction: column;
+	}
+	.urem-sidebar-content {
+		width: 100%;
+	}
+}
+
+/* Cards & Components */
+.urem-card {
+	background: #ffffff;
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	padding: 20px;
+	margin-bottom: 20px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.urem-card h2 {
+	margin-top: 0;
+	margin-bottom: 12px;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #1d2327;
+}
+
+.urem-guide-card {
+	border-left: 4px solid #2271b1;
+	background: #f0f6fc;
+}
+
+.urem-sidebar-card {
+	background: #ffffff;
+	border: 1px solid #c3c4c7;
+	border-radius: 6px;
+	padding: 16px;
+	margin-bottom: 20px;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.urem-sidebar-card h3 {
+	margin-top: 0;
+	margin-bottom: 12px;
+	font-size: 14px;
+	font-weight: 600;
+	border-bottom: 1px solid #f0f0f1;
+	padding-bottom: 8px;
+	color: #1d2327;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+/* Sidebar Info Lists */
+.urem-info-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.urem-info-list li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 0;
+	border-bottom: 1px dashed #f0f0f1;
+	font-size: 13px;
+}
+
+.urem-info-list li:last-child {
+	border-bottom: none;
+}
+
+.urem-info-list .label {
+	color: #646970;
+}
+
+.urem-info-list .value {
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* Status Badges */
 .urem-badge {
 	display: inline-block;
 	padding: 3px 8px;
-	font-size: 12px;
-	font-weight: 600;
-	border-radius: 4px;
-	line-height: 1.4;
-	text-align: center;
-}
-
-/* Green Badge: Aktif */
-.urem-badge-green {
-	background-color: #d1e7dd;
-	color: #0f5132;
-	border: 1px solid #badbcc;
-}
-
-/* Yellow Badge: Akan Expired (<30 hari) */
-.urem-badge-yellow {
-	background-color: #fff3cd;
-	color: #664d03;
-	border: 1px solid #ffecb5;
-}
-
-/* Red Badge: Expired */
-.urem-badge-red {
-	background-color: #f8d7da;
-	color: #842029;
-	border: 1px solid #f5c2c7;
-}
-
-/* Gray Badge: Disabled */
-.urem-badge-gray {
-	background-color: #e2e3e5;
-	color: #41464b;
-	border: 1px solid #d3d6d8;
-}
-
-.urem-trigger-tag {
-	display: inline-block;
-	padding: 2px 6px;
 	font-size: 11px;
-	background: #f0f0f1;
-	border: 1px solid #c3c4c7;
-	border-radius: 3px;
-	font-family: monospace;
+	font-weight: 600;
+	line-height: 1.2;
+	border-radius: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
 }
 
-.urem-admin-wrap .card {
-	background: #ffffff;
-	border: 1px solid #c3c4c7;
-	box-shadow: 0 1px 1px rgba(0,0,0,.04);
+.urem-badge-green {
+	background-color: #ecf7ed;
+	color: #1e7e34;
+	border: 1px solid #c3e6cb;
 }
 
-.urem-logs-container table code {
-	background: #f6f7f7;
-	padding: 2px 5px;
-	border-radius: 3px;
+.urem-badge-yellow {
+	background-color: #fff8e5;
+	color: #b7791f;
+	border: 1px solid #ffeeba;
+}
+
+.urem-badge-red {
+	background-color: #fde8e8;
+	color: #c53030;
+	border: 1px solid #f5c6cb;
+}
+
+.urem-badge-gray {
+	background-color: #f0f0f1;
+	color: #646970;
+	border: 1px solid #dcdcde;
+}
+
+/* Quick Action Buttons Grid */
+.urem-quick-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.urem-quick-actions .button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 6px 12px;
+	font-weight: 500;
 }
