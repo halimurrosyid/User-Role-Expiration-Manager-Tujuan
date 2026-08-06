@@ -26,9 +26,12 @@ define( 'UREM_PLUGIN_FILE', __FILE__ );
 define( 'UREM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'UREM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
-// Load Autoloader
-require_once UREM_PLUGIN_DIR . 'includes/class-autoloader.php';
-\UserRoleExpirationManager\Autoloader::register();
+// Load Autoloader with safety check
+$urem_autoloader = UREM_PLUGIN_DIR . 'includes/class-autoloader.php';
+if ( file_exists( $urem_autoloader ) ) {
+	require_once $urem_autoloader;
+	\UserRoleExpirationManager\Autoloader::register();
+}
 
 /**
  * Register Activation & Deactivation Hooks.
@@ -40,7 +43,10 @@ register_deactivation_hook( __FILE__, array( '\UserRoleExpirationManager\Plugin'
  * Bootstrap Main Plugin Instance.
  */
 function urem_init_plugin() {
-	return \UserRoleExpirationManager\Plugin::get_instance();
+	if ( class_exists( '\UserRoleExpirationManager\Plugin' ) ) {
+		return \UserRoleExpirationManager\Plugin::get_instance();
+	}
+	return null;
 }
 
 // Fire plugin bootstrap
