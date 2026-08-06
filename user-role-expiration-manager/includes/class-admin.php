@@ -27,6 +27,65 @@ class Admin {
 		add_action( 'admin_notices', array( __CLASS__, 'render_admin_notices' ) );
 		add_action( 'admin_post_urem_clear_logs', array( __CLASS__, 'handle_clear_logs' ) );
 		add_action( 'admin_post_urem_export_logs', array( Logger::class, 'export_csv_logs' ) );
+
+		// Plugin Action Links (Settings link under plugin name)
+		add_filter( 'plugin_action_links_' . plugin_basename( UREM_PLUGIN_FILE ), array( __CLASS__, 'add_plugin_action_links' ) );
+
+		// Plugin Row Meta (View details link next to Version & Author)
+		add_filter( 'plugin_row_meta', array( __CLASS__, 'add_plugin_row_meta' ), 10, 2 );
+	}
+
+	/**
+	 * Add "Settings" link to plugin action links on plugins.php page.
+	 *
+	 * @param array $links Existing action links.
+	 * @return array Modified action links.
+	 */
+	public static function add_plugin_action_links( $links ) {
+		$settings_url = admin_url( 'users.php?page=user-role-expiration-manager' );
+		$custom_links = array(
+			'settings' => sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'user-role-expiration-manager' ) ),
+		);
+
+		return array_merge( $custom_links, $links );
+	}
+
+	/**
+	 * Add "View details" link to plugin row meta on plugins.php page.
+	 *
+	 * @param array  $links Existing row meta links.
+	 * @param string $file Plugin file name.
+	 * @return array Modified row meta links.
+	 */
+	public static function add_plugin_row_meta( $links, $file ) {
+		if ( $file === plugin_basename( UREM_PLUGIN_FILE ) ) {
+			add_thickbox();
+
+			$details_url = add_query_arg(
+				array(
+					'tab'       => 'plugin-information',
+					'plugin'    => dirname( $file ),
+					'TB_iframe' => 'true',
+					'width'     => '600',
+					'height'    => '550',
+				),
+				self_admin_url( 'plugin-install.php' )
+			);
+
+			$row_meta = array(
+				'view_details' => sprintf(
+					'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
+					esc_url( $details_url ),
+					esc_attr__( 'View details for User Role Expiration Manager', 'user-role-expiration-manager' ),
+					esc_attr__( 'User Role Expiration Manager', 'user-role-expiration-manager' ),
+					esc_html__( 'View details', 'user-role-expiration-manager' )
+				),
+			);
+
+			return array_merge( $links, $row_meta );
+		}
+
+		return $links;
 	}
 
 	/**
