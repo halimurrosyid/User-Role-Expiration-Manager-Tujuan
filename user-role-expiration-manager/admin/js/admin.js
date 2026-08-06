@@ -25,4 +25,17 @@ jQuery(document).ready(function($) {
 			e.preventDefault();
 		}
 	});
+
+	// Quick Presets Auto-fill handler
+	$(document).on('change', '.urem-preset-selector', function() {
+		var $selected = $(this).find(':selected');
+		var duration = $selected.data('duration');
+		var unit = $selected.data('unit');
+
+		if (duration && unit) {
+			var $container = $(this).closest('tr, td, .urem-user-profile-section');
+			$container.find('.urem-duration-input').val(duration);
+			$container.find('.urem-unit-select').val(unit);
+		}
+	});
 });

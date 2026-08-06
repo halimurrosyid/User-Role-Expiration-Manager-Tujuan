@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $settings = \UserRoleExpirationManager\Settings::get_settings();
 $roles    = urem_get_all_roles();
 $units    = urem_get_expiration_units();
+$presets  = urem_get_duration_presets();
 ?>
 
 <div class="urem-settings-container">
@@ -56,14 +57,26 @@ $units    = urem_get_expiration_units();
 						</td>
 					</tr>
 
-					<!-- Default Duration & Unit -->
+					<!-- Default Duration & Unit & Presets -->
 					<tr>
 						<th scope="row">
 							<label for="urem_default_duration"><?php esc_html_e( 'Default Expiration Duration', 'user-role-expiration-manager' ); ?></label>
 						</th>
 						<td>
-							<input type="number" id="urem_default_duration" name="urem_settings[default_duration]" class="small-text" min="1" value="<?php echo esc_attr( (string) $settings['default_duration'] ); ?>">
-							<select name="urem_settings[default_unit]" id="urem_default_unit">
+							<div style="margin-bottom: 8px;">
+								<select class="urem-preset-selector">
+									<option value=""><?php esc_html_e( '⚡ Pilih Preset Cepat...', 'user-role-expiration-manager' ); ?></option>
+									<?php foreach ( $presets as $preset_key => $preset_info ) : ?>
+										<option value="<?php echo esc_attr( $preset_key ); ?>" data-duration="<?php echo esc_attr( (string) $preset_info['duration'] ); ?>" data-unit="<?php echo esc_attr( $preset_info['unit'] ); ?>">
+											<?php echo esc_html( $preset_info['label'] ); ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+								<span class="description"><?php esc_html_e( '(Klik preset untuk mengisi durasi secara otomatis)', 'user-role-expiration-manager' ); ?></span>
+							</div>
+
+							<input type="number" id="urem_default_duration" name="urem_settings[default_duration]" class="small-text urem-duration-input" min="1" value="<?php echo esc_attr( (string) $settings['default_duration'] ); ?>">
+							<select name="urem_settings[default_unit]" id="urem_default_unit" class="urem-unit-select">
 								<?php foreach ( $units as $unit_key => $unit_label ) : ?>
 									<option value="<?php echo esc_attr( $unit_key ); ?>" <?php selected( $settings['default_unit'], $unit_key ); ?>>
 										<?php echo esc_html( $unit_label ); ?>

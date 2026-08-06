@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $reset_url  = wp_nonce_url( admin_url( 'admin-post.php?action=urem_reset_user_start_date&user_id=' . $user->ID ), 'urem_reset_start_date_' . $user->ID, 'urem_nonce' );
 $expire_url = wp_nonce_url( admin_url( 'admin-post.php?action=urem_expire_user_now&user_id=' . $user->ID ), 'urem_expire_now_' . $user->ID, 'urem_nonce' );
+$presets    = urem_get_duration_presets();
 ?>
 
 <div class="urem-user-profile-section card" style="max-width: 800px; margin-top: 20px; padding: 15px 20px;">
@@ -45,14 +46,25 @@ $expire_url = wp_nonce_url( admin_url( 'admin-post.php?action=urem_expire_user_n
 				</td>
 			</tr>
 
-			<!-- Durasi & Satuan -->
+			<!-- Durasi & Satuan & Presets -->
 			<tr>
 				<th scope="row">
 					<label for="urem_expiration_duration"><?php esc_html_e( 'Durasi & Satuan', 'user-role-expiration-manager' ); ?></label>
 				</th>
 				<td>
-					<input type="number" id="urem_expiration_duration" name="urem_expiration_duration" class="small-text" min="1" value="<?php echo esc_attr( (string) $data['duration'] ); ?>">
-					<select name="urem_expiration_unit" id="urem_expiration_unit">
+					<div style="margin-bottom: 8px;">
+						<select class="urem-preset-selector">
+							<option value=""><?php esc_html_e( '⚡ Pilih Preset Cepat...', 'user-role-expiration-manager' ); ?></option>
+							<?php foreach ( $presets as $preset_key => $preset_info ) : ?>
+								<option value="<?php echo esc_attr( $preset_key ); ?>" data-duration="<?php echo esc_attr( (string) $preset_info['duration'] ); ?>" data-unit="<?php echo esc_attr( $preset_info['unit'] ); ?>">
+									<?php echo esc_html( $preset_info['label'] ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+
+					<input type="number" id="urem_expiration_duration" name="urem_expiration_duration" class="small-text urem-duration-input" min="1" value="<?php echo esc_attr( (string) $data['duration'] ); ?>">
+					<select name="urem_expiration_unit" id="urem_expiration_unit" class="urem-unit-select">
 						<?php foreach ( $units as $unit_key => $unit_label ) : ?>
 							<option value="<?php echo esc_attr( $unit_key ); ?>" <?php selected( $data['unit'], $unit_key ); ?>>
 								<?php echo esc_html( $unit_label ); ?>

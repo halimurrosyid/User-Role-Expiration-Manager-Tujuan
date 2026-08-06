@@ -4,14 +4,14 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 [![GitHub Release](https://img.shields.io/github/v/release/halimurrosyid/User-Role-Expiration-Manager-Tujuan?style=flat-square)](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan/releases)
 [![WordPress Compatible](https://img.shields.io/badge/WordPress-6.8%2B-blue?style=flat-square)](https://wordpress.org)
-[![PHP Compatible](https://img.shields.io/badge/PHP-8.1%2B-777bb4?style=flat-square)](https://php.net)
+[![PHP Compatible](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=flat-square)](https://php.net)
 
 ---
 
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.0.0
+- **Versi**: 1.0.1
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,6 +21,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
+- **Fitur Preset Cepat (Quick Presets)**: Mempermudah pemilihan durasi expired (7 Hari, 14 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) secara otomatis dengan 1-klik di Global Settings maupun halaman Edit User.
 - **Automatic Update dari Dashboard WordPress**: Terhubung langsung dengan repository GitHub (`halimurrosyid/User-Role-Expiration-Manager-Tujuan`). Setiap kali ada versi rilis baru di GitHub, WordPress akan mendeteksi dan memperbarui plugin secara otomatis dari Dashboard tanpa perlu instalasi ulang atau plugin tambahan.
 - **Tidak Mengubah Data Login Auth**: Menggunakan metadata sendiri (`_urem_*`) sehingga 100% aman dan kompatibel dengan plugin autentikasi seperti **Authorizer**, **WooCommerce**, **User Role Editor**, dan **Members**.
 - **Integrasi Native WP Admin**:
@@ -40,8 +41,8 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 📋 Persyaratan Sistem
 
-- **WordPress Version**: Minimal 6.8+
-- **PHP Version**: Minimal 8.1+
+- **WordPress Version**: Minimal 5.8+
+- **PHP Version**: Minimal 7.4+
 - **Database**: MySQL 5.7+ / MariaDB 10.3+
 
 ---
@@ -61,8 +62,9 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## ⚙️ Panduan Penggunaan
 
 ### 1. Pengaturan Global (`Pengguna` -> `Role Expiration` -> `Settings`)
+- **Pilih Preset Cepat**: Pilih opsi siap pakai (7 Hari, 1 Bulan, 1 Tahun, dll) untuk otomatis mengisi durasi.
 - **Enable Plugin**: Aktifkan atau nonaktifkan pemrosesan otomatis.
-- **Default Expiration Duration**: Tentukan durasi default (misalnya `30 Hari`, `2 Bulan`, `1 Tahun`).
+- **Default Expiration Duration**: Tentukan durasi default kustom jika tidak menggunakan preset.
 - **Default Role Setelah Expired**: Pilih role tujuan (misalnya `Subscriber` atau `No Role`).
 - **Jadwal WP-Cron**: Pilih frekuensi pemeriksaan (`Hourly`, `Twice Daily`, `Daily`).
 - **Session Logout**: Aktifkan untuk otomatis mengeluarkan pengguna dari login saat role-nya expired.
@@ -71,6 +73,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ### 2. Pengaturan Per Pengguna (`Pengguna` -> `Edit User`)
 Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration**:
+- **Pilih Preset Cepat**: Auto-fill durasi pengguna hanya dengan 1-klik.
 - **Enable Expiration**: Aktifkan/matikan khusus untuk user ini.
 - **Tanggal Mulai**: Tentukan tanggal awal perhitungan.
 - **Durasi & Satuan**: Set durasi khusus pengguna.
@@ -79,43 +82,13 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
   - `Reset Tanggal Mulai`: Mereset tanggal mulai ke waktu saat ini.
   - `Expire Sekarang`: Langsung mengubah role pengguna saat ini juga.
 
-### 3. Kolom & Bulk Actions (`Pengguna` -> `Semua Pengguna`)
-Tabel daftar pengguna dilengkapi kolom:
-- **Tanggal Mulai**
-- **Tanggal Expired**
-- **Role Setelah Expired**
-- **Status Badge**:
-  - 🟩 **Aktif**: Masa berlaku masih aman.
-  - 🟨 **Akan Expired**: Sisa kurang dari 30 hari.
-  - 🟥 **Expired**: Telah melewati tanggal expired.
-  - ⬜ **Disabled**: Fitur expiration dimatikan.
-- **Sisa Hari**
-
----
-
-## 📌 Alur Pembaruan Versi (Version Release Workflow)
-
-Setiap kali Anda membuat pembaruan atau perbaikan fitur pada plugin ini, ikuti alur peningkatan versi berikut agar tercatat dengan rapi dan otomatis terdeteksi oleh WordPress:
-
-1. **Perbarui Nomor Versi**:
-   - Di `user-role-expiration-manager.php`: Ubah header `Version: X.Y.Z` dan konstanta `define( 'UREM_VERSION', 'X.Y.Z' );`.
-2. **Catat Perubahan pada Changelog**:
-   - Tambahkan daftar perubahan baru pada seksi [Changelog](#-changelog) di file `README.md`.
-3. **Commit & Push ke GitHub**:
-   ```bash
-   git add .
-   git commit -m "Release version X.Y.Z - Brief description"
-   git push origin main
-   ```
-4. **Buat Release Tag di GitHub**:
-   - Buka halaman GitHub Repository -> **Releases** -> **Create a new release**.
-   - Masukkan Tag: `vX.Y.Z` (contoh: `v1.0.1`).
-   - Masukkan judul & deskripsi rilis.
-   - Selesai! Seluruh website WordPress yang memasang plugin ini akan otomatis menerima notifikasi update untuk versi `X.Y.Z`.
-
 ---
 
 ## 📝 Changelog
+
+### Version 1.0.1 (2026-08-06)
+- **Feature Update**: Menambahkan **Fitur Preset Cepat (Quick Presets)** durasi (7 Hari, 14 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) pada Global Settings dan Edit User page.
+- **Compatibility Improvement**: Optimasi penuh kompatibilitas direktori ZIP dan auto-loader untuk server Linux WordPress.
 
 ### Version 1.0.0 (2026-08-05)
 - **Initial Release**: Rilis perdana plugin User Role Expiration Manager oleh Mujaddid Halimurrosyid ([Telkom University IT](https://it.telkomuniversity.ac.id/)).
@@ -127,19 +100,6 @@ Setiap kali Anda membuat pembaruan atau perbaikan fitur pada plugin ini, ikuti a
 - Tombol **Scan Sekarang** untuk pemrosesan manual.
 - Database logging system (`{$wpdb->prefix}urem_logs`) dengan fitur **Export CSV** dan clear logs.
 - Fitur **GitHub Automatic Updater** terintegrasi secara bawaan.
-
----
-
-## 🛠️ Hook & Filter untuk Developer
-
-### Action Hooks
-- `urem_before_user_expired` ($user_id, $old_role, $target_role, $trigger)
-- `urem_after_user_expired` ($user_id, $old_role, $target_role, $trigger)
-
-### Filter Hooks
-- `urem_available_roles` ($roles)
-- `urem_expiring_soon_threshold_days` ($days)
-- `urem_expiration_units` ($units)
 
 ---
 

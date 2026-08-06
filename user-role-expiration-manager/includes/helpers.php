@@ -17,7 +17,7 @@ if ( ! function_exists( 'urem_get_all_roles' ) ) {
 	 *
 	 * @return array Array of role_key => Role Name.
 	 */
-	function urem_get_all_roles(): array {
+	function urem_get_all_roles() {
 		$roles = array(
 			'none' => __( 'No Role (Remove All Roles)', 'user-role-expiration-manager' ),
 		);
@@ -26,7 +26,7 @@ if ( ! function_exists( 'urem_get_all_roles' ) ) {
 
 		if ( ! empty( $editable_roles ) ) {
 			foreach ( $editable_roles as $role_key => $role_data ) {
-				$roles[ $role_key ] = translate_user_role( $role_data['name'] );
+				$roles[ $role_key ] = function_exists( 'translate_user_role' ) ? translate_user_role( $role_data['name'] ) : $role_data['name'];
 			}
 		} else {
 			global $wp_roles;
@@ -34,7 +34,7 @@ if ( ! function_exists( 'urem_get_all_roles' ) ) {
 				$wp_roles = new WP_Roles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
 			foreach ( $wp_roles->get_names() as $role_key => $role_name ) {
-				$roles[ $role_key ] = translate_user_role( $role_name );
+				$roles[ $role_key ] = function_exists( 'translate_user_role' ) ? translate_user_role( $role_name ) : $role_name;
 			}
 		}
 
@@ -53,7 +53,7 @@ if ( ! function_exists( 'urem_get_expiration_units' ) ) {
 	 *
 	 * @return array
 	 */
-	function urem_get_expiration_units(): array {
+	function urem_get_expiration_units() {
 		$units = array(
 			'days'   => __( 'Hari', 'user-role-expiration-manager' ),
 			'weeks'  => __( 'Minggu', 'user-role-expiration-manager' ),
@@ -70,6 +70,60 @@ if ( ! function_exists( 'urem_get_expiration_units' ) ) {
 	}
 }
 
+if ( ! function_exists( 'urem_get_duration_presets' ) ) {
+	/**
+	 * Get predefined quick duration presets.
+	 *
+	 * @return array Preset key => Preset configuration array.
+	 */
+	function urem_get_duration_presets() {
+		$presets = array(
+			'7_days'   => array(
+				'label'    => __( '7 Hari', 'user-role-expiration-manager' ),
+				'duration' => 7,
+				'unit'     => 'days',
+			),
+			'14_days'  => array(
+				'label'    => __( '14 Hari', 'user-role-expiration-manager' ),
+				'duration' => 14,
+				'unit'     => 'days',
+			),
+			'1_month'  => array(
+				'label'    => __( '1 Bulan (30 Hari)', 'user-role-expiration-manager' ),
+				'duration' => 1,
+				'unit'     => 'months',
+			),
+			'3_months' => array(
+				'label'    => __( '3 Bulan', 'user-role-expiration-manager' ),
+				'duration' => 3,
+				'unit'     => 'months',
+			),
+			'6_months' => array(
+				'label'    => __( '6 Bulan', 'user-role-expiration-manager' ),
+				'duration' => 6,
+				'unit'     => 'months',
+			),
+			'1_year'   => array(
+				'label'    => __( '1 Tahun', 'user-role-expiration-manager' ),
+				'duration' => 1,
+				'unit'     => 'years',
+			),
+			'2_years'  => array(
+				'label'    => __( '2 Tahun', 'user-role-expiration-manager' ),
+				'duration' => 2,
+				'unit'     => 'years',
+			),
+		);
+
+		/**
+		 * Filter available duration presets.
+		 *
+		 * @param array $presets Array of preset key => details.
+		 */
+		return apply_filters( 'urem_duration_presets', $presets );
+	}
+}
+
 if ( ! function_exists( 'urem_get_status_badge_html' ) ) {
 	/**
 	 * Generate HTML badge for expiration status.
@@ -77,7 +131,7 @@ if ( ! function_exists( 'urem_get_status_badge_html' ) ) {
 	 * @param string $status Status key: 'active', 'expiring_soon', 'expired', or 'disabled'.
 	 * @return string HTML output.
 	 */
-	function urem_get_status_badge_html( string $status ): string {
+	function urem_get_status_badge_html( $status ) {
 		switch ( $status ) {
 			case 'active':
 				$class = 'urem-badge urem-badge-green';
@@ -109,7 +163,7 @@ if ( ! function_exists( 'urem_format_datetime' ) ) {
 	 * @param int|string|null $timestamp Unix timestamp or string date.
 	 * @return string Formatted date string or '-'.
 	 */
-	function urem_format_datetime( $timestamp ): string {
+	function urem_format_datetime( $timestamp ) {
 		if ( empty( $timestamp ) ) {
 			return '-';
 		}
