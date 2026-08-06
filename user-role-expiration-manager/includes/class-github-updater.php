@@ -2,7 +2,7 @@
 /**
  * Self-Hosted GitHub Automatic Updater.
  *
- * Supports both GitHub Releases API and fallback direct GitHub Main Branch updates.
+ * Supports GitHub Releases API, direct raw main branch header fallback, and force check trigger.
  *
  * @package UserRoleExpirationManager
  */
@@ -63,20 +63,28 @@ class GitHub_Updater {
 	 * @return void
 	 */
 	public function init() {
+		// Inject into both transient getter and setter
+		add_filter( 'site_transient_update_plugins', array( $this, 'check_update' ) );
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_update' ) );
 		add_filter( 'plugins_api', array( $this, 'plugin_popup_info' ), 20, 3 );
 		add_filter( 'upgrader_post_install', array( $this, 'post_install_rename_folder' ), 10, 3 );
+
+		// Force check trigger handler via admin-post
+		add_action( 'admin_post_urem_force_check_update', array( $this, 'handle_force_check_update' ) );
 	}
 
 	/**
 	 * Fetch release data from GitHub API with fallback to main branch header.
 	 *
+	 * @param bool $force_refresh Skip cache if true.
 	 * @return object|null Release info object or null on failure.
 	 */
-	private function get_github_release_info() {
-		$cached = get_site_transient( $this->transient_key );
-		if ( false !== $cached && is_object( $cached ) ) {
-			return $cached;
+	public function get_github_release_info( $force_refresh = false ) {
+		if ( ! $force_refresh ) {
+			$cached = get_site_transient( $this->transient_key );
+			if ( false !== $cached && is_object( $cached ) ) {
+				return $cached;
+			}
 		}
 
 		// Strategy 1: Check GitHub Releases API
@@ -118,7 +126,7 @@ class GitHub_Updater {
 					'is_fallback'  => true,
 				);
 
-				set_site_transient( $this->transient_key, $fallback_data, 30 * MINUTE_IN_SECONDS );
+				set_site_transient( $this->transient_key, $fallback_data, 10 * MINUTE_IN_SECONDS );
 				return $fallback_data;
 			}
 		}
@@ -127,14 +135,14 @@ class GitHub_Updater {
 	}
 
 	/**
-	 * Hook into pre_set_site_transient_update_plugins to announce updates.
+	 * Hook into site_transient_update_plugins to announce updates.
 	 *
 	 * @param object $transient Transient data object.
 	 * @return object Modified transient object.
 	 */
 	public function check_update( $transient ) {
-		if ( empty( $transient->checked ) ) {
-			return $transient;
+		if ( ! is_object( $transient ) ) {
+			$transient = new \stdClass();
 		}
 
 		$release = $this->get_github_release_info();
@@ -159,15 +167,23 @@ class GitHub_Updater {
 
 			$slug = basename( dirname( UREM_PLUGIN_FILE ) );
 
-			$plugin_data = array(
+			$plugin_data = (object) array(
+				'id'          => 'https://github.com/' . $this->repository,
 				'slug'        => $slug,
 				'plugin'      => $this->plugin_basename,
 				'new_version' => $new_version,
 				'url'         => 'https://github.com/' . $this->repository,
 				'package'     => $download_url,
+				'tested'      => get_bloginfo( 'version' ),
+				'requires'    => '5.8',
+				'requires_php'=> '7.4',
 			);
 
-			$transient->response[ $this->plugin_basename ] = (object) $plugin_data;
+			if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
+				$transient->response = array();
+			}
+
+			$transient->response[ $this->plugin_basename ] = $plugin_data;
 		}
 
 		return $transient;
@@ -250,7 +266,36 @@ class GitHub_Updater {
 
 		// Clear update cache after install
 		delete_site_transient( $this->transient_key );
+		delete_site_transient( 'update_plugins' );
 
 		return $result;
+	}
+
+	/**
+	 * Handle instant force check update action from admin.
+	 *
+	 * @return void
+	 */
+	public function handle_force_check_update() {
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			wp_die( esc_html__( 'Unauthorized user.', 'user-role-expiration-manager' ) );
+		}
+
+		check_admin_referer( 'urem_force_check_update_nonce', 'urem_nonce' );
+
+		delete_site_transient( $this->transient_key );
+		delete_site_transient( 'update_plugins' );
+
+		$this->get_github_release_info( true );
+
+		$redirect_url = add_query_arg(
+			array(
+				'urem_update_checked' => 1,
+			),
+			admin_url( 'plugins.php' )
+		);
+
+		wp_safe_redirect( $redirect_url );
+		exit;
 	}
 }

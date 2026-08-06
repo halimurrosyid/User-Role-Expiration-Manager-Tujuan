@@ -28,7 +28,7 @@ class Admin {
 		add_action( 'admin_post_urem_clear_logs', array( __CLASS__, 'handle_clear_logs' ) );
 		add_action( 'admin_post_urem_export_logs', array( Logger::class, 'export_csv_logs' ) );
 
-		// Plugin Action Links (Settings link under plugin name)
+		// Plugin Action Links (Settings & Check Update links under plugin name)
 		add_filter( 'plugin_action_links_' . plugin_basename( UREM_PLUGIN_FILE ), array( __CLASS__, 'add_plugin_action_links' ) );
 
 		// Plugin Row Meta (View details link next to Version & Author)
@@ -36,15 +36,18 @@ class Admin {
 	}
 
 	/**
-	 * Add "Settings" link to plugin action links on plugins.php page.
+	 * Add "Settings" and "Cek Update GitHub" links to plugin action links on plugins.php page.
 	 *
 	 * @param array $links Existing action links.
 	 * @return array Modified action links.
 	 */
 	public static function add_plugin_action_links( $links ) {
 		$settings_url = admin_url( 'users.php?page=user-role-expiration-manager' );
+		$check_url    = wp_nonce_url( admin_url( 'admin-post.php?action=urem_force_check_update' ), 'urem_force_check_update_nonce', 'urem_nonce' );
+
 		$custom_links = array(
-			'settings' => sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'user-role-expiration-manager' ) ),
+			'settings'     => sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'user-role-expiration-manager' ) ),
+			'check_update' => sprintf( '<a href="%s" style="color: #2271b1; font-weight: 600;">%s</a>', esc_url( $check_url ), esc_html__( 'Cek Update GitHub', 'user-role-expiration-manager' ) ),
 		);
 
 		return array_merge( $custom_links, $links );
@@ -143,7 +146,7 @@ class Admin {
 	}
 
 	/**
-	 * Display Admin Notices for expiring/expired users.
+	 * Display Admin Notices for expiring/expired users and update check result.
 	 *
 	 * @return void
 	 */
@@ -154,6 +157,14 @@ class Admin {
 
 		if ( ! function_exists( 'get_current_screen' ) ) {
 			return;
+		}
+
+		// Show update check success notice on plugins.php page
+		if ( ! empty( $_GET['urem_update_checked'] ) ) {
+			printf(
+				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+				esc_html__( 'Pemeriksaan update ke GitHub berhasil dilakukan.', 'user-role-expiration-manager' )
+			);
 		}
 
 		// Only show on relevant admin screens to avoid spamming

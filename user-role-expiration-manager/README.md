@@ -11,7 +11,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.0.1
+- **Versi**: 1.0.2
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,6 +21,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
+- **Cek Update GitHub Direct**: Tombol pintas *Cek Update GitHub* di halaman Plugins untuk memeriksa update rilis terbaru secara instan dari GitHub.
 - **Fitur Preset Cepat (Quick Presets)**: Mempermudah pemilihan durasi expired (7 Hari, 14 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) secara otomatis dengan 1-klik di Global Settings maupun halaman Edit User.
 - **Automatic Update dari Dashboard WordPress**: Terhubung langsung dengan repository GitHub (`halimurrosyid/User-Role-Expiration-Manager-Tujuan`). Setiap kali ada versi rilis baru di GitHub, WordPress akan mendeteksi dan memperbarui plugin secara otomatis dari Dashboard tanpa perlu instalasi ulang atau plugin tambahan.
 - **Tidak Mengubah Data Login Auth**: Menggunakan metadata sendiri (`_urem_*`) sehingga 100% aman dan kompatibel dengan plugin autentikasi seperti **Authorizer**, **WooCommerce**, **User Role Editor**, dan **Members**.
@@ -86,20 +87,16 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 
 ## 📝 Changelog
 
+### Version 1.0.2 (2026-08-06)
+- **Automatic Updater Upgrade**: Menambahkan tombol **Cek Update GitHub** langsung pada tabel Plugins.
+- **Dual Transient Strategy**: Penggabungan rilis GitHub API + pemicu `pre_set_site_transient_update_plugins` & `site_transient_update_plugins`.
+
 ### Version 1.0.1 (2026-08-06)
 - **Feature Update**: Menambahkan **Fitur Preset Cepat (Quick Presets)** durasi (7 Hari, 14 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) pada Global Settings dan Edit User page.
 - **Compatibility Improvement**: Optimasi penuh kompatibilitas direktori ZIP dan auto-loader untuk server Linux WordPress.
 
 ### Version 1.0.0 (2026-08-05)
 - **Initial Release**: Rilis perdana plugin User Role Expiration Manager oleh Mujaddid Halimurrosyid ([Telkom University IT](https://it.telkomuniversity.ac.id/)).
-- Integration dengan menu native WordPress **Pengguna (Users)**.
-- Per-user role expiration management di halaman `user-edit.php`.
-- Dashboard Widget ringkasan status pengguna.
-- Kolom custom & dropdown filter pada `users.php`.
-- WP-Cron batching processor (100 users/batch).
-- Tombol **Scan Sekarang** untuk pemrosesan manual.
-- Database logging system (`{$wpdb->prefix}urem_logs`) dengan fitur **Export CSV** dan clear logs.
-- Fitur **GitHub Automatic Updater** terintegrasi secara bawaan.
 
 ---
 
