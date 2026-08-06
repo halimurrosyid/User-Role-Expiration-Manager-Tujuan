@@ -11,7 +11,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.0.2
+- **Versi**: 1.0.3
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,6 +21,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
+- **Visual DateTime Calendar Picker**: Picker tanggal & jam kalender interaktif untuk memudahkan pengisian Tanggal Mulai.
 - **Cek Update GitHub Direct**: Tombol pintas *Cek Update GitHub* di halaman Plugins untuk memeriksa update rilis terbaru secara instan dari GitHub.
 - **Fitur Preset Cepat (Quick Presets)**: Mempermudah pemilihan durasi expired (7 Hari, 14 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) secara otomatis dengan 1-klik di Global Settings maupun halaman Edit User.
 - **Automatic Update dari Dashboard WordPress**: Terhubung langsung dengan repository GitHub (`halimurrosyid/User-Role-Expiration-Manager-Tujuan`). Setiap kali ada versi rilis baru di GitHub, WordPress akan mendeteksi dan memperbarui plugin secara otomatis dari Dashboard tanpa perlu instalasi ulang atau plugin tambahan.
@@ -86,6 +87,11 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 ---
 
 ## 📝 Changelog
+
+### Version 1.0.3 (2026-08-06)
+- **UI & UX Enhancement**: Menambahkan picker tanggal/jam kalender interaktif HTML5 DateTime untuk Tanggal Mulai.
+- **Admin Protection Guard**: Ditambahkan proteksi tingkat lanjut yang memblokir akun Administrator yang sedang aktif dari risiko ter-expire.
+- **Version Alignment**: Penyesuaian versi resmi ke `1.0.3` secara menyeluruh pada file utama, ZIP, dan repository GitHub.
 
 ### Version 1.0.2 (2026-08-06)
 - **Automatic Updater Upgrade**: Menambahkan tombol **Cek Update GitHub** langsung pada tabel Plugins.
