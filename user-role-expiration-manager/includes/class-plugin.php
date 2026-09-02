@@ -51,7 +51,7 @@ final class Plugin {
 	 */
 	private function define_constants() {
 		if ( ! defined( 'UREM_VERSION' ) ) {
-			define( 'UREM_VERSION', '1.0.0' );
+			define( 'UREM_VERSION', '1.1.2' );
 		}
 		if ( ! defined( 'UREM_GITHUB_REPO' ) ) {
 			define( 'UREM_GITHUB_REPO', 'halimurrosyid/User-Role-Expiration-Manager-Tujuan' );
@@ -109,14 +109,18 @@ final class Plugin {
 	 */
 	public static function activate() {
 		Logger::create_table();
-		Cron::schedule_cron();
+
+		// Schedule cron with configured schedule
+		$settings = Settings::get_settings();
+		$schedule = ! empty( $settings['cron_schedule'] ) ? $settings['cron_schedule'] : 'daily';
+		Cron::schedule( $schedule );
 
 		// Ensure default options exist
-		if ( ! get_option( Settings::OPTION_NAME ) ) {
-			update_option( Settings::OPTION_NAME, Settings::get_defaults() );
+		if ( ! get_option( Settings::OPTION_KEY ) ) {
+			update_option( Settings::OPTION_KEY, Settings::get_defaults() );
 		}
 
-		// Clear rewrite rules or transients if needed
+		// Clear transients
 		delete_transient( 'urem_expiring_users_cache' );
 		delete_site_transient( 'urem_github_release_info' );
 	}
@@ -127,7 +131,7 @@ final class Plugin {
 	 * @return void
 	 */
 	public static function deactivate() {
-		Cron::unschedule_cron();
+		Cron::unschedule();
 		delete_site_transient( 'urem_github_release_info' );
 	}
 }
