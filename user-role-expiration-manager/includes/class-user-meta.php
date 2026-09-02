@@ -89,9 +89,10 @@ class User_Meta {
 			$start = current_time( 'Y-m-d H:i:s' );
 		}
 
-		$duration = isset( $_POST['urem_expiration_duration'] ) ? max( 1, absint( $_POST['urem_expiration_duration'] ) ) : 30;
-		$unit     = isset( $_POST['urem_expiration_unit'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_unit'] ) ) : 'days';
-		$role     = isset( $_POST['urem_expiration_role'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_role'] ) ) : 'subscriber';
+		$settings = Settings::get_settings();
+		$duration = isset( $_POST['urem_expiration_duration'] ) ? max( 1, absint( $_POST['urem_expiration_duration'] ) ) : (int) $settings['default_duration'];
+		$unit     = isset( $_POST['urem_expiration_unit'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_unit'] ) ) : $settings['default_unit'];
+		$role     = isset( $_POST['urem_expiration_role'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_role'] ) ) : $settings['default_role'];
 
 		update_user_meta( $user_id, Expiration::META_ENABLED, $enabled );
 		update_user_meta( $user_id, Expiration::META_START, $start );

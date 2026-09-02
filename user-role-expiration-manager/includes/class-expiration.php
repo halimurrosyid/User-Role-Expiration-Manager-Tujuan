@@ -28,7 +28,7 @@ class Expiration {
 	public const META_REMINDER_SENT = '_urem_reminder_sent';
 
 	/**
-	 * Get user expiration metadata with fallback to global settings.
+	 * Get user expiration metadata with fallback to saved global settings options.
 	 *
 	 * @param int $user_id User ID.
 	 * @return array Expiration data array.
@@ -40,9 +40,9 @@ class Expiration {
 		$unit     = get_user_meta( $user_id, self::META_UNIT, true );
 		$role     = get_user_meta( $user_id, self::META_ROLE, true );
 
-		$defaults = Settings::get_defaults();
+		$settings = Settings::get_settings();
 
-		// Fallbacks
+		// Fallbacks to saved global settings options
 		if ( '' === $enabled ) {
 			$enabled = '0';
 		}
@@ -52,17 +52,17 @@ class Expiration {
 		}
 
 		if ( '' === $duration || false === $duration ) {
-			$duration = (int) $defaults['default_duration'];
+			$duration = (int) $settings['default_duration'];
 		} else {
 			$duration = (int) $duration;
 		}
 
 		if ( empty( $unit ) ) {
-			$unit = $defaults['default_unit'];
+			$unit = $settings['default_unit'];
 		}
 
 		if ( '' === $role || false === $role ) {
-			$role = $defaults['default_role'];
+			$role = $settings['default_role'];
 		}
 
 		return array(

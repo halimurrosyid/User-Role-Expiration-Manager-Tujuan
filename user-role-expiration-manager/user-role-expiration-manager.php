@@ -3,7 +3,7 @@
  * Plugin Name: User Role Expiration Manager
  * Plugin URI: https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan
  * Description: Mengelola masa berlaku role pengguna WordPress secara otomatis dan aman dengan integrasi menu native Pengguna, per-user profile panel, WP-Cron batching, dan logger.
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: Mujaddid Halimurrosyid
  * Author URI: https://it.telkomuniversity.ac.id/
  * Text Domain: user-role-expiration-manager
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define Constants
-define( 'UREM_VERSION', '1.1.3' );
+define( 'UREM_VERSION', '1.1.4' );
 define( 'UREM_PLUGIN_FILE', __FILE__ );
 define( 'UREM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'UREM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
