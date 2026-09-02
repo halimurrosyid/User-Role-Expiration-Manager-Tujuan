@@ -42,6 +42,11 @@ class Expiration {
 
 		$settings = Settings::get_settings();
 
+		// Administrator accounts are disabled by default for absolute security
+		if ( user_can( $user_id, 'administrator' ) && '' === $enabled ) {
+			$enabled = '0';
+		}
+
 		// Fallbacks to saved global settings options
 		if ( '' === $enabled ) {
 			$enabled = '0';
@@ -81,6 +86,11 @@ class Expiration {
 	 * @return int|null Timestamp or null if not set.
 	 */
 	public static function get_expiration_timestamp( int $user_id ): ?int {
+		// Strict Immunity: Administrators return null timestamp
+		if ( user_can( $user_id, 'administrator' ) ) {
+			return null;
+		}
+
 		$data = self::get_user_expiration_data( $user_id );
 
 		if ( ! $data['enabled'] || empty( $data['start'] ) || $data['duration'] <= 0 ) {
@@ -123,6 +133,10 @@ class Expiration {
 	 * @return int|null Remaining days (negative if expired, null if disabled).
 	 */
 	public static function get_remaining_days( int $user_id ): ?int {
+		if ( user_can( $user_id, 'administrator' ) ) {
+			return null;
+		}
+
 		$exp_ts = self::get_expiration_timestamp( $user_id );
 		if ( null === $exp_ts ) {
 			return null;
@@ -141,6 +155,11 @@ class Expiration {
 	 * @return string 'active', 'expiring_soon', 'expired', or 'disabled'.
 	 */
 	public static function get_user_status( int $user_id ): string {
+		// Strict Immunity: Administrators always return 'disabled' status
+		if ( user_can( $user_id, 'administrator' ) ) {
+			return 'disabled';
+		}
+
 		$data = self::get_user_expiration_data( $user_id );
 		if ( ! $data['enabled'] ) {
 			return 'disabled';
@@ -184,6 +203,10 @@ class Expiration {
 	 * @return bool True if reminder sent.
 	 */
 	public static function check_and_send_pre_expiration_reminder( int $user_id ): bool {
+		if ( user_can( $user_id, 'administrator' ) ) {
+			return false;
+		}
+
 		$settings = Settings::get_settings();
 		if ( empty( $settings['send_reminder_email'] ) ) {
 			return false;
@@ -236,7 +259,7 @@ class Expiration {
 	/**
 	 * Execute role expiration transition for a user.
 	 *
-	 * Includes safety guards to prevent Administrator self-expiration.
+	 * Includes strict immunity guards to prevent Administrator self-expiration.
 	 *
 	 * @param int    $user_id User ID.
 	 * @param string $trigger Trigger source ('cron', 'manual_scan', 'manual_single', 'bulk_action').
@@ -248,8 +271,8 @@ class Expiration {
 			return false;
 		}
 
-		// SAFETY GUARD 1: Prevent current logged-in Administrator from expiring their own account
-		if ( is_user_logged_in() && get_current_user_id() === $user_id && current_user_can( 'manage_options' ) ) {
+		// STRICT IMMUNITY GUARD: Prevent ALL Administrator users from being expired under any circumstances
+		if ( user_can( $user_id, 'administrator' ) || user_can( $user_id, 'manage_options' ) ) {
 			return false;
 		}
 

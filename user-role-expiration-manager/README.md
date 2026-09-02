@@ -11,7 +11,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.1.4
+- **Versi**: 1.1.5
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,6 +21,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
+- **Strict Administrator Immunity Guard**: Akun Administrator (termasuk `pusti-kosmos`) memiliki imunitas penuh (kebal) dari fitur expiration. Sistem secara otomatis mematikan expiration dan mencegah pemrosesan role pada seluruh pengguna ber-role Administrator agar terhindar 100% dari risiko ter-lockout.
 - **Saved Global Settings Priority Fix**: Perbaikan nilai fallback pada `get_user_expiration_data()` sehingga saat pengguna di-enable, sistem selalu memprioritaskan opsi durasi global tersimpan (misal 1 Tahun) secara dinamis.
 - **Rich 4-Tab View Details Modal**: Pop-up rincian plugin berstandar WordPress.org yang menampilkan tab **Description**, **Installation**, **FAQ**, dan **Changelog**.
 - **100% Future-Proof & PHP 8.3+ / WP 6.8+ Ready**: Pengkodean berstandar tinggi yang bebas dari *deprecated methods*, aman untuk pembaruan WordPress dan PHP masa depan.
@@ -100,6 +101,9 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 
 ## 📝 Changelog
 
+### Version 1.1.5 (2026-09-02)
+- **Strict Administrator Immunity Guard**: Penambahan proteksi imunitas ketat pada seluruh akun Administrator sehingga otomatis berstatus *Disabled* dan diblokir dari risiko ter-expire atau ter-lockout.
+
 ### Version 1.1.4 (2026-09-02)
 - **Global Settings Fallback Fix**: Perbaikan method `Expiration::get_user_expiration_data()` dengan memanggil `Settings::get_settings()` agar opsi durasi global tersimpan (misal 1 Tahun) selalu digunakan saat mengaktifkan user baru.
 
@@ -139,7 +143,7 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 - **Dual Transient Strategy**: Penggabungan rilis GitHub API + pemicu `pre_set_site_transient_update_plugins` & `site_transient_update_plugins`.
 
 ### Version 1.0.1 (2026-08-06)
-- **Feature Update**: Menambahkan **Fitur Preset Cepat (Quick Presets)** durasi (7 Hari, 1 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) pada Global Settings dan Edit User page.
+- **Feature Update**: Menambahkan **Fitur Preset Cepat (Quick Presets)** durasi (7 Hari, 14 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) pada Global Settings dan Edit User page.
 - **Compatibility Improvement**: Optimasi penuh kompatibilitas direktori ZIP dan auto-loader untuk server Linux WordPress.
 
 ### Version 1.0.0 (2026-08-05)

@@ -63,7 +63,7 @@ class User_Meta {
 	}
 
 	/**
-	 * Save user profile meta fields.
+	 * Save user profile meta fields with Strict Admin Immunity Enforcement.
 	 *
 	 * @param int $user_id User ID.
 	 * @return void
@@ -77,7 +77,12 @@ class User_Meta {
 			return;
 		}
 
-		$enabled  = ! empty( $_POST['urem_expiration_enabled'] ) ? '1' : '0';
+		$enabled = ! empty( $_POST['urem_expiration_enabled'] ) ? '1' : '0';
+
+		// STRICT ADMIN IMMUNITY: Administrators can NEVER be enabled for expiration
+		if ( user_can( $user_id, 'administrator' ) ) {
+			$enabled = '0';
+		}
 
 		$start_input = isset( $_POST['urem_expiration_start'] ) ? sanitize_text_field( wp_unslash( $_POST['urem_expiration_start'] ) ) : '';
 		if ( ! empty( $start_input ) ) {
@@ -116,12 +121,12 @@ class User_Meta {
 		$user_id = isset( $_GET['user_id'] ) ? absint( $_GET['user_id'] ) : 0;
 		check_admin_referer( 'urem_reset_start_date_' . $user_id, 'urem_nonce' );
 
-		if ( $user_id ) {
+		if ( $user_id && ! user_can( $user_id, 'administrator' ) ) {
 			$now = current_time( 'Y-m-d H:i:s' );
 			update_user_meta( $user_id, Expiration::META_START, $now );
 			Expiration::update_expiration_timestamp_meta( $user_id );
 
-			$user = get_userdata( $user_id );
+			$user  = get_userdata( $user_id );
 			$email = $user ? $user->user_email : '';
 			Logger::add_log( $user_id, $email, '', '', 'reset', __( 'Expiration start date reset to current time.', 'user-role-expiration-manager' ) );
 		}
@@ -144,7 +149,7 @@ class User_Meta {
 		$user_id = isset( $_GET['user_id'] ) ? absint( $_GET['user_id'] ) : 0;
 		check_admin_referer( 'urem_expire_now_' . $user_id, 'urem_nonce' );
 
-		if ( $user_id ) {
+		if ( $user_id && ! user_can( $user_id, 'administrator' ) ) {
 			Expiration::process_user_expiration( $user_id, 'manual_single' );
 			Expiration::update_expiration_timestamp_meta( $user_id );
 		}
@@ -174,7 +179,7 @@ class User_Meta {
 	}
 
 	/**
-	 * Handle Bulk Action executions.
+	 * Handle Bulk Action executions with Strict Admin Immunity.
 	 *
 	 * @param string $sendback Sendback URL.
 	 * @param string $action Bulk action key.
@@ -187,14 +192,20 @@ class User_Meta {
 		}
 
 		$processed = 0;
+		$skipped   = 0;
 
 		switch ( $action ) {
 			case 'urem_bulk_enable':
 				foreach ( $user_ids as $id ) {
 					$id = (int) $id;
-					update_user_meta( $id, Expiration::META_ENABLED, '1' );
+					if ( user_can( $id, 'administrator' ) ) {
+						update_user_meta( $id, Expiration::META_ENABLED, '0' );
+						$skipped++;
+					} else {
+						update_user_meta( $id, Expiration::META_ENABLED, '1' );
+						$processed++;
+					}
 					Expiration::update_expiration_timestamp_meta( $id );
-					$processed++;
 				}
 				break;
 
@@ -211,18 +222,24 @@ class User_Meta {
 				$now = current_time( 'Y-m-d H:i:s' );
 				foreach ( $user_ids as $id ) {
 					$id = (int) $id;
-					update_user_meta( $id, Expiration::META_START, $now );
-					Expiration::update_expiration_timestamp_meta( $id );
-					$processed++;
+					if ( ! user_can( $id, 'administrator' ) ) {
+						update_user_meta( $id, Expiration::META_START, $now );
+						Expiration::update_expiration_timestamp_meta( $id );
+						$processed++;
+					} else {
+						$skipped++;
+					}
 				}
 				break;
 
 			case 'urem_bulk_expire':
 				foreach ( $user_ids as $id ) {
 					$id = (int) $id;
-					if ( Expiration::process_user_expiration( $id, 'bulk_action' ) ) {
+					if ( ! user_can( $id, 'administrator' ) && Expiration::process_user_expiration( $id, 'bulk_action' ) ) {
 						Expiration::update_expiration_timestamp_meta( $id );
 						$processed++;
+					} else {
+						$skipped++;
 					}
 				}
 				break;
@@ -235,6 +252,7 @@ class User_Meta {
 			array(
 				'urem_bulk_performed' => $action,
 				'urem_bulk_count'     => $processed,
+				'urem_bulk_skipped'   => $skipped,
 			),
 			$sendback
 		);
@@ -259,13 +277,17 @@ class User_Meta {
 			return;
 		}
 
-		$count  = absint( $_GET['urem_bulk_count'] );
-		$action = sanitize_text_field( wp_unslash( $_GET['urem_bulk_performed'] ) );
+		$count   = absint( $_GET['urem_bulk_count'] );
+		$skipped = isset( $_GET['urem_bulk_skipped'] ) ? absint( $_GET['urem_bulk_skipped'] ) : 0;
+		$action  = sanitize_text_field( wp_unslash( $_GET['urem_bulk_performed'] ) );
 
 		$message = '';
 		switch ( $action ) {
 			case 'urem_bulk_enable':
 				$message = sprintf( __( 'Expiration enabled for %d users.', 'user-role-expiration-manager' ), $count );
+				if ( $skipped > 0 ) {
+					$message .= ' ' . sprintf( __( '(%d akun Administrator dilewati demi keamanan imunitas admin).', 'user-role-expiration-manager' ), $skipped );
+				}
 				break;
 			case 'urem_bulk_disable':
 				$message = sprintf( __( 'Expiration disabled for %d users.', 'user-role-expiration-manager' ), $count );
