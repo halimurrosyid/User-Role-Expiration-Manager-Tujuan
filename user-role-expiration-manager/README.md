@@ -11,7 +11,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.1.0
+- **Versi**: 1.1.1
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,6 +21,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
+- **100% Future-Proof & PHP 8.3+ / WP 6.8+ Ready**: Pengkodean berstandar tinggi yang bebas dari *deprecated methods*, aman untuk pembaruan WordPress dan PHP masa depan.
 - **Kustomisasi Subjek & Pesan Email Notifikasi**: Bebas mengatur subjek dan isi pesan email yang dikirim ke pengguna dengan placeholder dinamis (`{user_name}`, `{old_role}`, `{new_role}`, `{site_name}`, `{expiration_date}`, `{days_left}`).
 - **Email Peringatan Pengingat SEBELUM Expired**: Fitur pengiriman email pengingat otomatis (misal H-3 atau H-7) kepada pengguna sebelum masa berlaku role habis.
 - **Pembersihan Log Otomatis (Auto-Prune Logs)**: Pengaturan retensi log database otomatis (misal menghapus log yang lebih lama dari 90 hari) untuk menjaga ukuran database tetap bersih.
@@ -49,8 +50,8 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 📋 Persyaratan Sistem
 
-- **WordPress Version**: Minimal 5.8+
-- **PHP Version**: Minimal 7.4+
+- **WordPress Version**: Minimal 5.8+ (Diuji hingga WordPress 6.8+)
+- **PHP Version**: Minimal 7.4+ (Diuji hingga PHP 8.3+)
 - **Database**: MySQL 5.7+ / MariaDB 10.3+
 
 ---
@@ -63,7 +64,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
    ```
 2. Buka dashboard WordPress admin -> **Plugin** -> **Plugin Terpasang**.
 3. Cari **User Role Expiration Manager** dan klik **Aktifkan**.
-4. **Update Otomatis**: Plugin sudah dilengkapi dengan fitur *GitHub Automatic Updater*. Saat ada versi rilis baru di GitHub, pemberitahuan update akan otomatis muncul di menu **Dashboard** -> **Pembaruan (Updates)** WordPress dan dapat di-update dengan 1-klik tanpa perlu melakukan upload ulang secara manual!
+4. **Update Otomatis**: Plugin sudah dilengkapi dengan fitur *GitHub Automatic Updater*. Saat ada versi rilis baru di repository GitHub, pemberitahuan update akan otomatis muncul di menu **Dashboard** -> **Pembaruan (Updates)** WordPress dan dapat di-update dengan 1-klik tanpa perlu melakukan upload ulang secara manual!
 
 ---
 
@@ -96,6 +97,11 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 ---
 
 ## 📝 Changelog
+
+### Version 1.1.1 (2026-09-02)
+- **Future-Proofing & Maintenance Release**:
+  - Penyempurnaan `uninstall.php` dengan penghapusan cron event `urem_daily_expiration_event` secara bersih.
+  - Verifikasi penuh kompatibilitas PHP 8.0, 8.1, 8.2, 8.3+ dan WordPress 6.8+.
 
 ### Version 1.1.0 (2026-08-06)
 - **Major Feature Release**:

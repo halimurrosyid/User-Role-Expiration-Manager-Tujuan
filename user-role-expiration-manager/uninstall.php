@@ -11,14 +11,14 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-// Delete global settings option
+// Delete global settings option and transients
 delete_option( 'urem_settings' );
-delete_transient( 'urem_expiring_users_cache' );
+delete_site_transient( 'urem_github_release_info' );
 
 // Unschedule cron job
-$timestamp = wp_next_scheduled( 'urem_scheduled_expiration_check' );
+$timestamp = wp_next_scheduled( 'urem_daily_expiration_event' );
 if ( $timestamp ) {
-	wp_unschedule_event( $timestamp, 'urem_scheduled_expiration_check' );
+	wp_unschedule_event( $timestamp, 'urem_daily_expiration_event' );
 }
 
 // Drop custom DB table
