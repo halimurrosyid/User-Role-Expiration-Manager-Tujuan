@@ -3,7 +3,7 @@
  * Self-Hosted GitHub Automatic Updater.
  *
  * Supports GitHub Releases API, direct raw main branch header fallback, force check trigger,
- * upgrader_source_selection folder routing, and native row notice injection.
+ * upgrader_source_selection folder routing, native row notice injection, and rich View Details modal.
  *
  * @package UserRoleExpirationManager
  */
@@ -276,7 +276,7 @@ class GitHub_Updater {
 	}
 
 	/**
-	 * Provide plugin details for the "View Details" popup.
+	 * Provide plugin details for the "View Details" popup modal with rich tabs.
 	 *
 	 * @param object|bool $result Result object.
 	 * @param string      $action Action type.
@@ -293,12 +293,8 @@ class GitHub_Updater {
 			return $result;
 		}
 
-		$release = $this->get_github_release_info();
-		if ( ! $release ) {
-			return $result;
-		}
-
-		$new_version = ltrim( $release->tag_name, 'v' );
+		$release     = $this->get_github_release_info();
+		$new_version = $release ? ltrim( $release->tag_name, 'v' ) : UREM_VERSION;
 
 		$res                = new \stdClass();
 		$res->name          = 'User Role Expiration Manager';
@@ -309,12 +305,52 @@ class GitHub_Updater {
 		$res->requires      = '5.8';
 		$res->tested        = get_bloginfo( 'version' );
 		$res->requires_php  = '7.4';
-		$res->download_link = ! empty( $release->zipball_url ) ? $release->zipball_url : '';
+		$res->download_link = 'https://github.com/' . $this->repository . '/archive/refs/heads/main.zip';
 
-		$changelog_content  = ! empty( $release->body ) ? wp_kses_post( nl2br( $release->body ) ) : esc_html__( 'Maintenance update and bug fixes.', 'user-role-expiration-manager' );
-		$res->sections      = array(
-			'description' => esc_html__( 'Mengelola masa berlaku role pengguna WordPress secara otomatis, aman, dan efisien.', 'user-role-expiration-manager' ),
-			'changelog'   => $changelog_content,
+		// TAB 1: Description
+		$description  = '<h3>Mengelola Masa Berlaku Role Pengguna WordPress Secara Otomatis & Aman</h3>';
+		$description .= '<p><strong>User Role Expiration Manager</strong> adalah plugin WordPress profesional yang mengotomatisasi perubahan role (peran) pengguna setelah jangka waktu tertentu. Sangat ideal untuk situs keanggotaan (membership), langganan pengguna, akses portal kampus/perusahaan, WooCommerce, dan peran terbatas.</p>';
+		$description .= '<h4>✨ Fitur Utama:</h4>';
+		$description .= '<ul>';
+		$description .= '<li><strong>⚡ Preset Durasi Cepat:</strong> Pilihan 1-klik (7 Hari, 14 Hari, 1 Bulan, 3 Bulan, 6 Bulan, 1 Tahun, 2 Tahun) dengan auto-fill otomatis.</li>';
+		$description .= '<li><strong>📅 Visual DateTime Picker:</strong> Picker tanggal dan jam kalender interaktif pada halaman Edit User.</li>';
+		$description .= '<li><strong>🛡️ Admin Safety Guard:</strong> Proteksi otomatis memblokir akun Administrator yang sedang aktif agar tidak ter-expire secara tidak sengaja.</li>';
+		$description .= '<li><strong>📧 Template Email & Pengingat H-3 / H-7:</strong> Editor template pesan email notifikasi dengan placeholder dinamis ({user_name}, {expiration_date}, dll) serta pengingat otomatis sebelum expired.</li>';
+		$description .= '<li><strong>📊 Layout 2-Kolom & Dashboard Widget:</strong> Tampilan modern dengan widget ringkasan statistik live dan kartu akses pintas.</li>';
+		$description .= '<li><strong>📝 Database Logger & Ekspor CSV:</strong> Pencatatan riwayat perubahan role ke database custom dengan fitur pencarian, retensi log otomatis (auto-prune), dan ekspor CSV.</li>';
+		$description .= '<li><strong>🔄 GitHub Auto-Updater:</strong> Update 1-klik langsung dari Dashboard WordPress tanpa perlu upload file ZIP manual.</li>';
+		$description .= '</ul>';
+		$description .= '<h4>👨‍💻 Pengembang (Author):</h4>';
+		$description .= '<p><strong>Mujaddid Halimurrosyid</strong> — Direktorat SDM / IT Telkom University (<a href="https://it.telkomuniversity.ac.id/" target="_blank">https://it.telkomuniversity.ac.id/</a>)</p>';
+
+		// TAB 2: Installation
+		$installation  = '<h3>Panduan Instalasi & Konfigurasi</h3>';
+		$installation .= '<ol>';
+		$installation .= '<li>Unggah folder <code>user-role-expiration-manager</code> ke direktori <code>/wp-content/plugins/</code> atau unggah file ZIP via <strong>Plugin &rarr; Tambah Baru &rarr; Unggah Plugin</strong>.</li>';
+		$installation .= '<li>Aktifkan plugin melalui menu <strong>Plugin Terpasang</strong> di WordPress Admin.</li>';
+		$installation .= '<li>Buka menu <strong>Pengguna &rarr; Role Expiration</strong> untuk mengkonfigurasi durasi default, role tujuan, dan template email.</li>';
+		$installation .= '<li>Buka menu <strong>Pengguna &rarr; Edit User</strong> untuk mengatur durasi spesifik per pengguna.</li>';
+		$installation .= '</ol>';
+
+		// TAB 3: FAQ
+		$faq  = '<h3>Pertanyaan Sering Diajukan (FAQ)</h3>';
+		$faq .= '<p><strong>Q: Apakah akun Administrator saya aman saat proses scan berjalan?</strong><br>A: Ya, 100% aman. Sistem memiliki proteksi <em>Admin Protection Guard</em> yang memblokir perubahan role pada akun Administrator yang sedang aktif.</p>';
+		$faq .= '<p><strong>Q: Apakah plugin ini merusak data login atau password pengguna?</strong><br>A: Tidak. Plugin menyimpan metadata pada meta key terisolasi (<code>_urem_*</code>) dan tidak mengganggu tabel autentikasi <code>wp_users</code>.</p>';
+		$faq .= '<p><strong>Q: Apakah kompatibel dengan WooCommerce dan User Role Editor?</strong><br>A: Ya, plugin membaca seluruh daftar role dinamis (termasuk <em>Customer</em>, <em>Shop Manager</em>, dan custom role) via API resmi WordPress.</p>';
+
+		// TAB 4: Changelog
+		$changelog  = '<h3>Riwayat Versi (Changelog)</h3>';
+		$changelog .= '<p><strong>Version 1.1.3</strong><br>- Enhanced View Details popup with rich Description, Installation, FAQ, and Changelog tabs.</p>';
+		$changelog .= '<p><strong>Version 1.1.2</strong><br>- Fixed activation fatal error in Plugin::activate().</p>';
+		$changelog .= '<p><strong>Version 1.1.0</strong><br>- Added Email Template Editor, Pre-expiration Email Reminders, Auto-prune logs, and Per-user log history table.</p>';
+		$changelog .= '<p><strong>Version 1.0.5</strong><br>- Redesigned admin interface with 2-Column Responsive Layout and sidebar cards.</p>';
+		$changelog .= '<p><strong>Version 1.0.0</strong><br>- Initial release by Mujaddid Halimurrosyid (Telkom University IT).</p>';
+
+		$res->sections = array(
+			'description'  => $description,
+			'installation' => $installation,
+			'faq'          => $faq,
+			'changelog'    => $changelog,
 		);
 
 		return $res;

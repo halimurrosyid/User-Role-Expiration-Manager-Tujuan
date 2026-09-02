@@ -11,7 +11,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.1.2
+- **Versi**: 1.1.3
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,7 +21,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
-- **100% Activation Fatal Error Fix**: Perbaikan penuh pada handler aktivasi plugin (`Plugin::activate()`) sehingga proses aktivasi dan pembuatan database berjalan 100% lancar tanpa fatal error.
+- **Rich 4-Tab View Details Modal**: Pop-up rincian plugin berstandar WordPress.org yang menampilkan tab **Description**, **Installation**, **FAQ**, dan **Changelog**.
 - **100% Future-Proof & PHP 8.3+ / WP 6.8+ Ready**: Pengkodean berstandar tinggi yang bebas dari *deprecated methods*, aman untuk pembaruan WordPress dan PHP masa depan.
 - **Kustomisasi Subjek & Pesan Email Notifikasi**: Bebas mengatur subjek dan isi pesan email yang dikirim ke pengguna dengan placeholder dinamis (`{user_name}`, `{old_role}`, `{new_role}`, `{site_name}`, `{expiration_date}`, `{days_left}`).
 - **Email Peringatan Pengingat SEBELUM Expired**: Fitur pengiriman email pengingat otomatis (misal H-3 atau H-7) kepada pengguna sebelum masa berlaku role habis.
@@ -98,6 +98,9 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 ---
 
 ## 📝 Changelog
+
+### Version 1.1.3 (2026-09-02)
+- **Rich View Details Modal**: Penambahan 4 tab lengkap (*Description*, *Installation*, *FAQ*, dan *Changelog*) pada pop-up Thickbox modal rincian plugin.
 
 ### Version 1.1.2 (2026-09-02)
 - **Critical Activation Fix**: Perbaikan panggilan method `Cron::schedule()` dan konstanta `Settings::OPTION_KEY` pada `Plugin::activate()` untuk mengatasi pesan *Plugin could not be activated because it triggered a fatal error* 100%.
