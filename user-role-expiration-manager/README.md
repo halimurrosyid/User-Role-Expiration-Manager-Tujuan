@@ -11,7 +11,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 ## 📌 Informasi Plugin
 
 - **Nama Plugin**: User Role Expiration Manager
-- **Versi**: 1.1.6
+- **Versi**: 1.1.7
 - **Pengembang (Author)**: [Mujaddid Halimurrosyid](https://it.telkomuniversity.ac.id/)
 - **Website Institusi**: [https://it.telkomuniversity.ac.id/](https://it.telkomuniversity.ac.id/)
 - **Repository GitHub**: [https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan](https://github.com/halimurrosyid/User-Role-Expiration-Manager-Tujuan)
@@ -21,6 +21,7 @@ Plugin WordPress profesional untuk mengelola masa berlaku role pengguna secara o
 
 ## 🌟 Fitur Utama
 
+- **100% Code Quality & Key Consistency Audit**: Penyempurnaan menyeluruh pada penamaan elemen form global `enabled` dan `enable_logging` di `settings-page.php` dan `class-settings.php` sehingga 100% konsisten.
 - **Primary Configurator Admin Immunity**: Akun Administrator Utama yang mengaktifkan/mengkonfigurasi plugin (seperti `pusti-kosmos` / User ID 1) diproteksi secara permanen dari fitur expiration agar tidak pernah ter-lockout, sementara akun pengguna lain tetap dapat dikonfigurasi masa berlakunya jika diinginkan.
 - **Strict Administrator Immunity Guard**: Fitur proteksi imunitas ketat pada akun Administrator utama.
 - **Saved Global Settings Priority Fix**: Perbaikan nilai fallback pada `get_user_expiration_data()` sehingga saat pengguna di-enable, sistem selalu memprioritaskan opsi durasi global tersimpan (misal 1 Tahun) secara dinamis.
@@ -101,6 +102,9 @@ Pada bagian bawah halaman edit profil pengguna terdapat panel **Role Expiration*
 ---
 
 ## 📝 Changelog
+
+### Version 1.1.7 (2026-09-02)
+- **Code Audit & Key Alignment**: Penyelarasan penuh nama elemen form `enabled` dan `enable_logging` antara tampilan `settings-page.php` dan handler `class-settings.php`.
 
 ### Version 1.1.6 (2026-09-02)
 - **Primary Configurator Admin Immunity**: Penambahan method `Expiration::is_primary_admin()` untuk secara permanen memproteksi akun Administrator utama pengatur plugin (seperti `pusti-kosmos` / User ID 1) dari risiko ter-expire atau lockout.

@@ -52,6 +52,7 @@ class Settings {
 			'reminder_days_before'   => 3,
 			'reminder_subject'       => __( 'Penting: Peran Pengguna Anda Akan Expired dalam {days_left} Hari - {site_name}', 'user-role-expiration-manager' ),
 			'reminder_message'       => __( "Halo {user_name},\n\nPeran/role ({old_role}) Anda di {site_name} akan berakhir dalam {days_left} hari lagi (pada {expiration_date}).\nSetelah tanggal tersebut, peran Anda akan otomatis berubah menjadi ({new_role}).\n\nSilakan lakukan perpanjangan keanggotaan sebelum batas waktu habis.\n\nSalam,\n{site_name}", 'user-role-expiration-manager' ),
+			'enable_logging'         => '1',
 			'log_retention_days'     => 90,
 			'dry_run_mode'           => '0',
 			'primary_admin_id'       => $current_user_id ? $current_user_id : 1,
@@ -129,7 +130,8 @@ class Settings {
 		$output['reminder_subject']      = isset( $input['reminder_subject'] ) ? sanitize_text_field( wp_unslash( $input['reminder_subject'] ) ) : $defaults['reminder_subject'];
 		$output['reminder_message']      = isset( $input['reminder_message'] ) ? sanitize_textarea_field( wp_unslash( $input['reminder_message'] ) ) : $defaults['reminder_message'];
 
-		$output['log_retention_days']    = isset( $input['log_retention_days'] ) ? max( 1, absint( $input['log_retention_days'] ) ) : 90;
+		$output['enable_logging']        = ! empty( $input['enable_logging'] ) ? '1' : '0';
+		$output['log_retention_days']    = isset( $input['log_retention_days'] ) ? max( 0, absint( $input['log_retention_days'] ) ) : 90;
 		$output['dry_run_mode']          = ! empty( $input['dry_run_mode'] ) ? '1' : '0';
 
 		// Preserve primary admin ID

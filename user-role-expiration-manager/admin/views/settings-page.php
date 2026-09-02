@@ -61,7 +61,7 @@ $check_update_url = wp_nonce_url( admin_url( 'admin-post.php?action=urem_force_c
 				<?php esc_html_e( 'Panduan Ringkas Penggunaan Plugin', 'user-role-expiration-manager' ); ?>
 			</h2>
 			<p style="font-size: 13px; line-height: 1.6; color: #1d2327; margin-bottom: 10px;">
-				Plugin ini mengelola masa berlaku role (peran) pengguna secara otomatis. Setelah durasi waktu habis sejak tanggal mulai, role pengguna akan otomatis berpindah ke role lain yang Anda tentukan (misalnya dari <em>Administrator/Editor</em> menjadi <em>Subscriber</em> atau <em>No Role</em>).
+				Plugin ini mengelola masa berlaku role (peran) pengguna secara otomatis. Setelah durasi waktu habis sejak tanggal mulai, role pengguna akan otomatis berpindah ke role lain yang Anda tentukan (misalnya dari <em>Editor/Author</em> menjadi <em>Subscriber</em> atau <em>No Role</em>).
 			</p>
 			<ol style="margin-left: 20px; line-height: 1.8; color: #2c3338; margin-bottom: 0; font-size: 13px;">
 				<li><strong>Langkah 1:</strong> Atur durasi default & role tujuan pada form di bawah ini lalu klik <em>Simpan Perubahan Pengaturan</em>.</li>
@@ -109,7 +109,7 @@ $check_update_url = wp_nonce_url( admin_url( 'admin-post.php?action=urem_force_c
 							</th>
 							<td>
 								<label for="urem_plugin_enabled">
-									<input type="checkbox" id="urem_plugin_enabled" name="urem_settings[plugin_enabled]" value="1" <?php checked( $settings['plugin_enabled'], '1' ); ?>>
+									<input type="checkbox" id="urem_plugin_enabled" name="urem_settings[enabled]" value="1" <?php checked( $settings['enabled'], '1' ); ?>>
 									<strong><?php esc_html_e( 'Aktifkan pemrosesan otomatis masa berlaku role pengguna.', 'user-role-expiration-manager' ); ?></strong>
 								</label>
 								<p class="description"><?php esc_html_e( 'Jika di-uncheck, sistem tidak akan mengubah role pengguna secara otomatis.', 'user-role-expiration-manager' ); ?></p>
