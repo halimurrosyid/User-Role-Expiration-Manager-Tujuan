@@ -63,7 +63,7 @@ class User_Meta {
 	}
 
 	/**
-	 * Save user profile meta fields with Strict Admin Immunity Enforcement.
+	 * Save user profile meta fields with Primary Configurator Admin Immunity Enforcement.
 	 *
 	 * @param int $user_id User ID.
 	 * @return void
@@ -79,8 +79,8 @@ class User_Meta {
 
 		$enabled = ! empty( $_POST['urem_expiration_enabled'] ) ? '1' : '0';
 
-		// STRICT ADMIN IMMUNITY: Administrators can NEVER be enabled for expiration
-		if ( user_can( $user_id, 'administrator' ) ) {
+		// PRIMARY CONFIGURATOR ADMIN IMMUNITY: Primary admin can NEVER be enabled for expiration
+		if ( Expiration::is_primary_admin( $user_id ) ) {
 			$enabled = '0';
 		}
 
@@ -121,7 +121,7 @@ class User_Meta {
 		$user_id = isset( $_GET['user_id'] ) ? absint( $_GET['user_id'] ) : 0;
 		check_admin_referer( 'urem_reset_start_date_' . $user_id, 'urem_nonce' );
 
-		if ( $user_id && ! user_can( $user_id, 'administrator' ) ) {
+		if ( $user_id && ! Expiration::is_primary_admin( $user_id ) ) {
 			$now = current_time( 'Y-m-d H:i:s' );
 			update_user_meta( $user_id, Expiration::META_START, $now );
 			Expiration::update_expiration_timestamp_meta( $user_id );
@@ -149,7 +149,7 @@ class User_Meta {
 		$user_id = isset( $_GET['user_id'] ) ? absint( $_GET['user_id'] ) : 0;
 		check_admin_referer( 'urem_expire_now_' . $user_id, 'urem_nonce' );
 
-		if ( $user_id && ! user_can( $user_id, 'administrator' ) ) {
+		if ( $user_id && ! Expiration::is_primary_admin( $user_id ) ) {
 			Expiration::process_user_expiration( $user_id, 'manual_single' );
 			Expiration::update_expiration_timestamp_meta( $user_id );
 		}
@@ -179,7 +179,7 @@ class User_Meta {
 	}
 
 	/**
-	 * Handle Bulk Action executions with Strict Admin Immunity.
+	 * Handle Bulk Action executions with Primary Configurator Admin Immunity.
 	 *
 	 * @param string $sendback Sendback URL.
 	 * @param string $action Bulk action key.
@@ -198,7 +198,7 @@ class User_Meta {
 			case 'urem_bulk_enable':
 				foreach ( $user_ids as $id ) {
 					$id = (int) $id;
-					if ( user_can( $id, 'administrator' ) ) {
+					if ( Expiration::is_primary_admin( $id ) ) {
 						update_user_meta( $id, Expiration::META_ENABLED, '0' );
 						$skipped++;
 					} else {
@@ -222,7 +222,7 @@ class User_Meta {
 				$now = current_time( 'Y-m-d H:i:s' );
 				foreach ( $user_ids as $id ) {
 					$id = (int) $id;
-					if ( ! user_can( $id, 'administrator' ) ) {
+					if ( ! Expiration::is_primary_admin( $id ) ) {
 						update_user_meta( $id, Expiration::META_START, $now );
 						Expiration::update_expiration_timestamp_meta( $id );
 						$processed++;
@@ -235,7 +235,7 @@ class User_Meta {
 			case 'urem_bulk_expire':
 				foreach ( $user_ids as $id ) {
 					$id = (int) $id;
-					if ( ! user_can( $id, 'administrator' ) && Expiration::process_user_expiration( $id, 'bulk_action' ) ) {
+					if ( ! Expiration::is_primary_admin( $id ) && Expiration::process_user_expiration( $id, 'bulk_action' ) ) {
 						Expiration::update_expiration_timestamp_meta( $id );
 						$processed++;
 					} else {
@@ -286,7 +286,7 @@ class User_Meta {
 			case 'urem_bulk_enable':
 				$message = sprintf( __( 'Expiration enabled for %d users.', 'user-role-expiration-manager' ), $count );
 				if ( $skipped > 0 ) {
-					$message .= ' ' . sprintf( __( '(%d akun Administrator dilewati demi keamanan imunitas admin).', 'user-role-expiration-manager' ), $skipped );
+					$message .= ' ' . sprintf( __( '(%d akun Administrator Utama Konfigurator dilewati demi keamanan imunitas admin).', 'user-role-expiration-manager' ), $skipped );
 				}
 				break;
 			case 'urem_bulk_disable':

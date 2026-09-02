@@ -9,10 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$is_admin_user = user_can( $user->ID, 'administrator' );
-$reset_url     = wp_nonce_url( admin_url( 'admin-post.php?action=urem_reset_user_start_date&user_id=' . $user->ID ), 'urem_reset_start_date_' . $user->ID, 'urem_nonce' );
-$expire_url    = wp_nonce_url( admin_url( 'admin-post.php?action=urem_expire_user_now&user_id=' . $user->ID ), 'urem_expire_now_' . $user->ID, 'urem_nonce' );
-$presets       = urem_get_duration_presets();
+$is_primary_admin = \UserRoleExpirationManager\Expiration::is_primary_admin( $user->ID );
+$reset_url        = wp_nonce_url( admin_url( 'admin-post.php?action=urem_reset_user_start_date&user_id=' . $user->ID ), 'urem_reset_start_date_' . $user->ID, 'urem_nonce' );
+$expire_url       = wp_nonce_url( admin_url( 'admin-post.php?action=urem_expire_user_now&user_id=' . $user->ID ), 'urem_expire_now_' . $user->ID, 'urem_nonce' );
+$presets          = urem_get_duration_presets();
 
 // Format start date for datetime-local input
 $formatted_start = '';
@@ -39,11 +39,11 @@ $user_logs      = $user_logs_data['items'];
 
 	<?php wp_nonce_field( 'urem_save_user_profile', 'urem_user_profile_nonce' ); ?>
 
-	<?php if ( $is_admin_user ) : ?>
+	<?php if ( $is_primary_admin ) : ?>
 		<div class="notice notice-info inline" style="margin-bottom: 15px; border-left-color: #008a20; background: #f0fdf4;">
 			<p style="margin: 0.5em 0; color: #1e7e34; font-weight: 600;">
 				<span class="dashicons dashicons-shield" style="vertical-align: middle; margin-right: 4px;"></span>
-				<?php esc_html_e( '🛡️ Proteksi Imunitas Admin Aktif: Pengguna ber-role Administrator kebal (immune) dari fitur expiration agar terhindar dari risiko ter-lockout dari situs.', 'user-role-expiration-manager' ); ?>
+				<?php esc_html_e( '🛡️ Proteksi Administrator Utama (Pemilik / Konfigurator Plugin): Akun ini terproteksi secara permanen dari fitur expiration agar Anda terhindar 100% dari risiko ter-lockout dari situs.', 'user-role-expiration-manager' ); ?>
 			</p>
 		</div>
 	<?php endif; ?>
@@ -55,11 +55,11 @@ $user_logs      = $user_logs_data['items'];
 				<th scope="row"><?php esc_html_e( 'Enable Expiration', 'user-role-expiration-manager' ); ?></th>
 				<td>
 					<label for="urem_expiration_enabled">
-						<input type="checkbox" id="urem_expiration_enabled" name="urem_expiration_enabled" value="1" <?php checked( $data['enabled'] ); ?> <?php disabled( $is_admin_user ); ?>>
+						<input type="checkbox" id="urem_expiration_enabled" name="urem_expiration_enabled" value="1" <?php checked( $data['enabled'] ); ?> <?php disabled( $is_primary_admin ); ?>>
 						<strong><?php esc_html_e( 'Aktifkan penentuan masa berlaku role untuk pengguna ini', 'user-role-expiration-manager' ); ?></strong>
 					</label>
-					<?php if ( $is_admin_user ) : ?>
-						<p class="description" style="color: #008a20; font-weight: 600;"><?php esc_html_e( '(Dimatikan secara otomatis untuk akun Administrator)', 'user-role-expiration-manager' ); ?></p>
+					<?php if ( $is_primary_admin ) : ?>
+						<p class="description" style="color: #008a20; font-weight: 600;"><?php esc_html_e( '(Dimatikan secara otomatis khusus untuk akun Administrator Utama Konfigurator)', 'user-role-expiration-manager' ); ?></p>
 					<?php endif; ?>
 				</td>
 			</tr>
@@ -70,7 +70,7 @@ $user_logs      = $user_logs_data['items'];
 					<label for="urem_expiration_start"><?php esc_html_e( 'Tanggal Mulai', 'user-role-expiration-manager' ); ?></label>
 				</th>
 				<td>
-					<input type="datetime-local" id="urem_expiration_start" name="urem_expiration_start" class="regular-text" value="<?php echo esc_attr( $formatted_start ); ?>" <?php disabled( $is_admin_user ); ?>>
+					<input type="datetime-local" id="urem_expiration_start" name="urem_expiration_start" class="regular-text" value="<?php echo esc_attr( $formatted_start ); ?>" <?php disabled( $is_primary_admin ); ?>>
 					<p class="description"><?php esc_html_e( 'Klik icon kalender untuk memilih tanggal & jam awal perhitungan secara visual.', 'user-role-expiration-manager' ); ?></p>
 				</td>
 			</tr>
@@ -82,7 +82,7 @@ $user_logs      = $user_logs_data['items'];
 				</th>
 				<td>
 					<div style="margin-bottom: 8px;">
-						<select class="urem-preset-selector" style="font-weight: 600; color: #2271b1;" <?php disabled( $is_admin_user ); ?>>
+						<select class="urem-preset-selector" style="font-weight: 600; color: #2271b1;" <?php disabled( $is_primary_admin ); ?>>
 							<option value=""><?php esc_html_e( '⚡ Pilih Preset Cepat...', 'user-role-expiration-manager' ); ?></option>
 							<?php foreach ( $presets as $preset_key => $preset_info ) : ?>
 								<option value="<?php echo esc_attr( $preset_key ); ?>" data-duration="<?php echo esc_attr( (string) $preset_info['duration'] ); ?>" data-unit="<?php echo esc_attr( $preset_info['unit'] ); ?>">
@@ -92,8 +92,8 @@ $user_logs      = $user_logs_data['items'];
 						</select>
 					</div>
 
-					<input type="number" id="urem_expiration_duration" name="urem_expiration_duration" class="small-text urem-duration-input" min="1" value="<?php echo esc_attr( (string) $data['duration'] ); ?>" <?php disabled( $is_admin_user ); ?>>
-					<select name="urem_expiration_unit" id="urem_expiration_unit" class="urem-unit-select" <?php disabled( $is_admin_user ); ?>>
+					<input type="number" id="urem_expiration_duration" name="urem_expiration_duration" class="small-text urem-duration-input" min="1" value="<?php echo esc_attr( (string) $data['duration'] ); ?>" <?php disabled( $is_primary_admin ); ?>>
+					<select name="urem_expiration_unit" id="urem_expiration_unit" class="urem-unit-select" <?php disabled( $is_primary_admin ); ?>>
 						<?php foreach ( $units as $unit_key => $unit_label ) : ?>
 							<option value="<?php echo esc_attr( $unit_key ); ?>" <?php selected( $data['unit'], $unit_key ); ?>>
 								<?php echo esc_html( $unit_label ); ?>
@@ -109,7 +109,7 @@ $user_logs      = $user_logs_data['items'];
 					<label for="urem_expiration_role"><?php esc_html_e( 'Role Setelah Expired', 'user-role-expiration-manager' ); ?></label>
 				</th>
 				<td>
-					<select name="urem_expiration_role" id="urem_expiration_role" <?php disabled( $is_admin_user ); ?>>
+					<select name="urem_expiration_role" id="urem_expiration_role" <?php disabled( $is_primary_admin ); ?>>
 						<?php foreach ( $all_roles as $role_key => $role_label ) : ?>
 							<option value="<?php echo esc_attr( $role_key ); ?>" <?php selected( $data['role'], $role_key ); ?>>
 								<?php echo esc_html( $role_label ); ?>
@@ -153,7 +153,7 @@ $user_logs      = $user_logs_data['items'];
 			</tr>
 
 			<!-- Action Buttons -->
-			<?php if ( ! $is_admin_user ) : ?>
+			<?php if ( ! $is_primary_admin ) : ?>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Tindakan Manual', 'user-role-expiration-manager' ); ?></th>
 					<td>

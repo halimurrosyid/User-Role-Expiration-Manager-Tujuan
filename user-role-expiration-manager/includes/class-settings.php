@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings API Handler Class.
+ * Plugin Settings API Handler.
  *
  * @package UserRoleExpirationManager
  */
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Settings {
 
 	/**
-	 * Option name in wp_options table.
+	 * Option key in wp_options.
 	 */
 	public const OPTION_KEY = 'urem_settings';
 
@@ -33,49 +33,56 @@ class Settings {
 	/**
 	 * Get default settings values.
 	 *
-	 * @return array Default settings array.
+	 * @return array Default settings.
 	 */
 	public static function get_defaults(): array {
-		$site_name = get_bloginfo( 'name' );
+		$current_user_id = get_current_user_id();
 
 		return array(
-			'plugin_enabled'        => '1',
-			'default_duration'      => 30,
-			'default_unit'          => 'days',
-			'default_role'          => 'subscriber',
-			'cron_schedule'         => 'daily',
-			'logout_user_on_expire' => '0',
-			'send_email_on_expire'  => '1',
-			'email_subject'         => sprintf( '[%s] Masa Berlaku Role Anda Telah Habis', $site_name ),
-			'email_message'         => "Halo {user_name},\r\n\r\nMasa berlaku role Anda di {site_name} telah habis pada {expiration_date}.\r\nRole Anda telah diubah dari {old_role} menjadi {new_role}.\r\n\r\nJika Anda memerlukan bantuan atau ingin memperbarui akses, silakan hubungi administrator.\r\n\r\nHormat kami,\r\n{site_name}",
-			'send_reminder_email'   => '1',
-			'reminder_days_before'  => 3,
-			'reminder_subject'      => sprintf( '[%s] Peringatan: Role Anda Akan Expired dalam {days_left} Hari', $site_name ),
-			'reminder_message'      => "Halo {user_name},\r\n\r\nPemberitahuan: Masa berlaku role ({old_role}) Anda di {site_name} akan expired dalam {days_left} hari pada tanggal {expiration_date}.\r\n\r\nSilakan perbarui keanggotaan Anda untuk mempertahankan akses.\r\n\r\nHormat kami,\r\n{site_name}",
-			'dry_run_mode'          => '0',
-			'enable_logging'        => '1',
-			'log_retention_days'    => 90,
+			'enabled'                => '1',
+			'default_duration'       => 30,
+			'default_unit'           => 'days',
+			'default_role'           => 'subscriber',
+			'cron_schedule'          => 'daily',
+			'logout_user_on_expire'  => '0',
+			'send_email_on_expire'   => '1',
+			'email_subject'          => __( 'Pemberitahuan: Masa Berlaku Peran Pengguna Anda Telah Berakhir di {site_name}', 'user-role-expiration-manager' ),
+			'email_message'          => __( "Halo {user_name},\n\nMasa berlaku peran/role ({old_role}) Anda di {site_name} telah berakhir pada {expiration_date}.\nPeran akun Anda kini telah diubah menjadi ({new_role}).\n\nJika ada pertanyaan, silakan hubungi tim administrator situs.\n\nSalam,\n{site_name}", 'user-role-expiration-manager' ),
+			'send_reminder_email'    => '1',
+			'reminder_days_before'   => 3,
+			'reminder_subject'       => __( 'Penting: Peran Pengguna Anda Akan Expired dalam {days_left} Hari - {site_name}', 'user-role-expiration-manager' ),
+			'reminder_message'       => __( "Halo {user_name},\n\nPeran/role ({old_role}) Anda di {site_name} akan berakhir dalam {days_left} hari lagi (pada {expiration_date}).\nSetelah tanggal tersebut, peran Anda akan otomatis berubah menjadi ({new_role}).\n\nSilakan lakukan perpanjangan keanggotaan sebelum batas waktu habis.\n\nSalam,\n{site_name}", 'user-role-expiration-manager' ),
+			'log_retention_days'     => 90,
+			'dry_run_mode'           => '0',
+			'primary_admin_id'       => $current_user_id ? $current_user_id : 1,
 		);
 	}
 
 	/**
-	 * Get stored settings merged with defaults.
+	 * Retrieve saved settings with defaults fallback.
 	 *
-	 * @return array Stored settings array.
+	 * @return array Settings array.
 	 */
 	public static function get_settings(): array {
+		$saved    = get_option( self::OPTION_KEY, array() );
 		$defaults = self::get_defaults();
-		$stored   = get_option( self::OPTION_KEY, array() );
 
-		if ( ! is_array( $stored ) ) {
-			$stored = array();
+		if ( ! is_array( $saved ) ) {
+			$saved = array();
 		}
 
-		return wp_parse_args( $stored, $defaults );
+		$settings = wp_parse_args( $saved, $defaults );
+
+		// Auto-set primary admin ID if missing
+		if ( empty( $settings['primary_admin_id'] ) && get_current_user_id() ) {
+			$settings['primary_admin_id'] = get_current_user_id();
+		}
+
+		return $settings;
 	}
 
 	/**
-	 * Register Settings API fields with WordPress.
+	 * Register settings field with WordPress Settings API.
 	 *
 	 * @return void
 	 */
@@ -92,43 +99,43 @@ class Settings {
 	}
 
 	/**
-	 * Sanitize submitted settings inputs.
+	 * Sanitize submitted settings form values.
 	 *
-	 * @param array $input Raw input array.
-	 * @return array Sanitized settings array.
+	 * @param array $input Submitted data.
+	 * @return array Sanitized data.
 	 */
 	public static function sanitize_settings( $input ): array {
-		$defaults  = self::get_defaults();
-		$sanitized = array();
+		$output   = array();
+		$defaults = self::get_defaults();
 
-		$sanitized['plugin_enabled']        = ! empty( $input['plugin_enabled'] ) ? '1' : '0';
-		$sanitized['default_duration']      = isset( $input['default_duration'] ) ? max( 1, absint( $input['default_duration'] ) ) : $defaults['default_duration'];
-		$sanitized['default_unit']          = isset( $input['default_unit'] ) ? sanitize_text_field( $input['default_unit'] ) : $defaults['default_unit'];
-		$sanitized['default_role']          = isset( $input['default_role'] ) ? sanitize_text_field( $input['default_role'] ) : $defaults['default_role'];
-		$sanitized['cron_schedule']         = isset( $input['cron_schedule'] ) ? sanitize_text_field( $input['cron_schedule'] ) : $defaults['cron_schedule'];
-		$sanitized['logout_user_on_expire'] = ! empty( $input['logout_user_on_expire'] ) ? '1' : '0';
+		$output['enabled']               = ! empty( $input['enabled'] ) ? '1' : '0';
+		$output['default_duration']      = isset( $input['default_duration'] ) ? max( 1, absint( $input['default_duration'] ) ) : 30;
+		$output['default_unit']          = isset( $input['default_unit'] ) && in_array( $input['default_unit'], array( 'days', 'weeks', 'months', 'years' ), true ) ? $input['default_unit'] : 'days';
 
-		// Email Expiration
-		$sanitized['send_email_on_expire']  = ! empty( $input['send_email_on_expire'] ) ? '1' : '0';
-		$sanitized['email_subject']         = isset( $input['email_subject'] ) ? sanitize_text_field( $input['email_subject'] ) : $defaults['email_subject'];
-		$sanitized['email_message']         = isset( $input['email_message'] ) ? sanitize_textarea_field( $input['email_message'] ) : $defaults['email_message'];
+		$all_roles = urem_get_all_roles();
+		$output['default_role']          = isset( $input['default_role'] ) && isset( $all_roles[ $input['default_role'] ] ) ? $input['default_role'] : 'subscriber';
 
-		// Reminder Email
-		$sanitized['send_reminder_email']   = ! empty( $input['send_reminder_email'] ) ? '1' : '0';
-		$sanitized['reminder_days_before']  = isset( $input['reminder_days_before'] ) ? max( 1, absint( $input['reminder_days_before'] ) ) : $defaults['reminder_days_before'];
-		$sanitized['reminder_subject']      = isset( $input['reminder_subject'] ) ? sanitize_text_field( $input['reminder_subject'] ) : $defaults['reminder_subject'];
-		$sanitized['reminder_message']      = isset( $input['reminder_message'] ) ? sanitize_textarea_field( $input['reminder_message'] ) : $defaults['reminder_message'];
+		$output['cron_schedule']         = isset( $input['cron_schedule'] ) && in_array( $input['cron_schedule'], array( 'hourly', 'twicedaily', 'daily' ), true ) ? $input['cron_schedule'] : 'daily';
 
-		$sanitized['dry_run_mode']          = ! empty( $input['dry_run_mode'] ) ? '1' : '0';
-		$sanitized['enable_logging']        = ! empty( $input['enable_logging'] ) ? '1' : '0';
-		$sanitized['log_retention_days']    = isset( $input['log_retention_days'] ) ? absint( $input['log_retention_days'] ) : $defaults['log_retention_days'];
+		$output['logout_user_on_expire'] = ! empty( $input['logout_user_on_expire'] ) ? '1' : '0';
+		$output['send_email_on_expire']  = ! empty( $input['send_email_on_expire'] ) ? '1' : '0';
 
-		// Re-schedule cron if schedule setting changed
-		$old_settings = self::get_settings();
-		if ( $old_settings['cron_schedule'] !== $sanitized['cron_schedule'] ) {
-			Cron::reschedule( $sanitized['cron_schedule'] );
-		}
+		$output['email_subject']         = isset( $input['email_subject'] ) ? sanitize_text_field( wp_unslash( $input['email_subject'] ) ) : $defaults['email_subject'];
+		$output['email_message']         = isset( $input['email_message'] ) ? sanitize_textarea_field( wp_unslash( $input['email_message'] ) ) : $defaults['email_message'];
 
-		return $sanitized;
+		$output['send_reminder_email']   = ! empty( $input['send_reminder_email'] ) ? '1' : '0';
+		$output['reminder_days_before']  = isset( $input['reminder_days_before'] ) ? max( 1, absint( $input['reminder_days_before'] ) ) : 3;
+
+		$output['reminder_subject']      = isset( $input['reminder_subject'] ) ? sanitize_text_field( wp_unslash( $input['reminder_subject'] ) ) : $defaults['reminder_subject'];
+		$output['reminder_message']      = isset( $input['reminder_message'] ) ? sanitize_textarea_field( wp_unslash( $input['reminder_message'] ) ) : $defaults['reminder_message'];
+
+		$output['log_retention_days']    = isset( $input['log_retention_days'] ) ? max( 1, absint( $input['log_retention_days'] ) ) : 90;
+		$output['dry_run_mode']          = ! empty( $input['dry_run_mode'] ) ? '1' : '0';
+
+		// Preserve primary admin ID
+		$existing                        = get_option( self::OPTION_KEY, array() );
+		$output['primary_admin_id']      = ! empty( $existing['primary_admin_id'] ) ? (int) $existing['primary_admin_id'] : get_current_user_id();
+
+		return $output;
 	}
 }

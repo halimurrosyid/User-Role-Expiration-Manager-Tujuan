@@ -28,6 +28,33 @@ class Expiration {
 	public const META_REMINDER_SENT = '_urem_reminder_sent';
 
 	/**
+	 * Check if a user is the Primary Administrator / Plugin Configurator / Site Owner.
+	 *
+	 * Primary configurator admins have permanent immunity from role expiration.
+	 *
+	 * @param int $user_id User ID.
+	 * @return bool True if primary admin.
+	 */
+	public static function is_primary_admin( int $user_id ): bool {
+		if ( 1 === $user_id ) {
+			return true;
+		}
+
+		$settings   = Settings::get_settings();
+		$primary_id = ! empty( $settings['primary_admin_id'] ) ? (int) $settings['primary_admin_id'] : 0;
+
+		if ( $primary_id && $user_id === $primary_id ) {
+			return true;
+		}
+
+		if ( is_user_logged_in() && get_current_user_id() === $user_id && current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Get user expiration metadata with fallback to saved global settings options.
 	 *
 	 * @param int $user_id User ID.
@@ -42,8 +69,8 @@ class Expiration {
 
 		$settings = Settings::get_settings();
 
-		// Administrator accounts are disabled by default for absolute security
-		if ( user_can( $user_id, 'administrator' ) && '' === $enabled ) {
+		// Primary admin accounts are disabled by default for absolute security
+		if ( self::is_primary_admin( $user_id ) ) {
 			$enabled = '0';
 		}
 
@@ -86,8 +113,7 @@ class Expiration {
 	 * @return int|null Timestamp or null if not set.
 	 */
 	public static function get_expiration_timestamp( int $user_id ): ?int {
-		// Strict Immunity: Administrators return null timestamp
-		if ( user_can( $user_id, 'administrator' ) ) {
+		if ( self::is_primary_admin( $user_id ) ) {
 			return null;
 		}
 
@@ -133,7 +159,7 @@ class Expiration {
 	 * @return int|null Remaining days (negative if expired, null if disabled).
 	 */
 	public static function get_remaining_days( int $user_id ): ?int {
-		if ( user_can( $user_id, 'administrator' ) ) {
+		if ( self::is_primary_admin( $user_id ) ) {
 			return null;
 		}
 
@@ -155,8 +181,7 @@ class Expiration {
 	 * @return string 'active', 'expiring_soon', 'expired', or 'disabled'.
 	 */
 	public static function get_user_status( int $user_id ): string {
-		// Strict Immunity: Administrators always return 'disabled' status
-		if ( user_can( $user_id, 'administrator' ) ) {
+		if ( self::is_primary_admin( $user_id ) ) {
 			return 'disabled';
 		}
 
@@ -203,7 +228,7 @@ class Expiration {
 	 * @return bool True if reminder sent.
 	 */
 	public static function check_and_send_pre_expiration_reminder( int $user_id ): bool {
-		if ( user_can( $user_id, 'administrator' ) ) {
+		if ( self::is_primary_admin( $user_id ) ) {
 			return false;
 		}
 
@@ -259,7 +284,7 @@ class Expiration {
 	/**
 	 * Execute role expiration transition for a user.
 	 *
-	 * Includes strict immunity guards to prevent Administrator self-expiration.
+	 * Includes strict immunity guards to prevent Primary Administrator self-expiration.
 	 *
 	 * @param int    $user_id User ID.
 	 * @param string $trigger Trigger source ('cron', 'manual_scan', 'manual_single', 'bulk_action').
@@ -271,8 +296,8 @@ class Expiration {
 			return false;
 		}
 
-		// STRICT IMMUNITY GUARD: Prevent ALL Administrator users from being expired under any circumstances
-		if ( user_can( $user_id, 'administrator' ) || user_can( $user_id, 'manage_options' ) ) {
+		// STRICT PRIMARY ADMIN IMMUNITY GUARD: Prevent Primary Admin / Configurator / Owner from being expired
+		if ( self::is_primary_admin( $user_id ) ) {
 			return false;
 		}
 
